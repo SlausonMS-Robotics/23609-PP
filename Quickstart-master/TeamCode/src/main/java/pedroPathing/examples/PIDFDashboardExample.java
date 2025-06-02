@@ -1,0 +1,30 @@
+package pedroPathing.examples;
+
+
+// Example OpMode usage (in a LinearOpMode)
+
+
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+
+import java.util.Arrays;
+import robot.PIDFTuning;
+import robot.Subsystems;
+
+@com.qualcomm.robotcore.eventloop.opmode.Autonomous(name = "PIDF Dashboard Example", group = "Test")
+public class PIDFDashboardExample extends LinearOpMode {
+    Subsystems robot = new Subsystems();
+
+    @Override
+    public void runOpMode() {
+        robot.init(hardwareMap);
+        waitForStart();
+
+        robot.moveMotorsToPositionPIDF(
+                Arrays.asList(robot.armMotor, robot.vslideMotor),
+                Arrays.asList(800, 1200),
+                Arrays.asList(PIDFTuning.armTargetVelocity, PIDFTuning.vslideTargetVelocity),
+                5,
+                3.0
+        );
+    }
+}
