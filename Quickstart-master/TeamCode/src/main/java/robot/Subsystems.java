@@ -5,6 +5,8 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+import utils.SCurveMotionController;
+import com.qualcomm.robotcore.hardware.DcMotor;
 
 public class Subsystems {
     public DcMotorEx armMotor, vslideMotor;
@@ -84,6 +86,9 @@ public class Subsystems {
             motor.setPower(pidf.calculate(target, motor.getCurrentPosition(), 0.0, timer.seconds()));
         }
     }*/
+
+
+
 }
 
 
