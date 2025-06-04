@@ -46,6 +46,8 @@ public class SCurveMotionController {
     // Dashboard-configurable defaults
     public static double defaultDuration = 1.5;    // seconds
     public static double defaultVelocity = 500.0;  // ticks/sec
+    public static double MAX_SEGMENT_DURATION = 3.0; // seconds
+    private static final double MIN_POWER = 0.4;
 
     /**
      * Constructor for single motor S-curve control.
@@ -114,22 +116,22 @@ public class SCurveMotionController {
 
         double t = timer.seconds();
 
-        // Check if the current motion segment is complete
-        if (t > duration) {
+        // timeout check
+        if (t > duration || t > MAX_SEGMENT_DURATION) {
             startPos1 = endPos1;
             if (dualMotors) startPos2 = endPos2;
             isActive = false;
             startNextSegment();
 
-            // If motion queue is empty but hold is enabled, continue holding final target
             if (!isActive && holdFinalPosition) {
                 motor1.setTargetPosition((int) endPos1);
-                motor1.setPower(0.2); // Small holding power
+                motor1.setPower(0.2);
                 if (dualMotors) {
                     motor2.setTargetPosition((int) endPos2);
                     motor2.setPower(0.2);
                 }
             }
+
             return false;
         }
 
@@ -195,17 +197,18 @@ public class SCurveMotionController {
     }
 
     /**
-     * S-curve position interpolation: 3t² - 2t³
+     * S-curve position interpolation:
      */
     private double sCurve(double t) {
-        return 3 * t * t - 2 * t * t * t;
+        return 10 * Math.pow(t, 3) - 15 * Math.pow(t, 4) + 6 * Math.pow(t, 5); // Minimum-jerk position curve
+        //return 1 - Math.pow(1 - t, 3); // turbo: Math.pow(t, 4), smooth and balanced: t * t * (3 - 2 * t), exponential like: 1 - Math.pow(1 - t, 3)
     }
-
     /**
-     * Derivative of S-curve for velocity profile: 6t - 6t²
+     * Derivative of S-curve
      */
     private double sCurveDeriv(double t) {
-        return 6 * t - 6 * t * t;
+        return 30 * Math.pow(t, 2) - 60 * Math.pow(t, 3) + 30 * Math.pow(t, 4); // Minimum-jerk position curve
+        //return 3 * Math.pow(1 - t, 2); //turbo: if (t < 0.001) return 0;  return 0.8 * Math.pow(t, -0.2); smooth and balanced: 6 * t - 6 * t * t, exponential: 3 * Math.pow(1 - t, 2)
     }
 
     /**
@@ -222,7 +225,8 @@ public class SCurveMotionController {
      * @return scaled motor power
      */
     private double scalePower(double velocity) {
-        return Math.max(0.1, Math.min(1.0, Math.abs(velocity / maxVelocity)));
+        double scaled = Math.abs(velocity / maxVelocity);
+        return MIN_POWER + (1 - MIN_POWER) * clamp(scaled);
     }
 
     /**

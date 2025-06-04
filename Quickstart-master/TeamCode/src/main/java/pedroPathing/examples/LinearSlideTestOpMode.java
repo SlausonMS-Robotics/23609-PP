@@ -1,6 +1,8 @@
 package pedroPathing.examples;
 
 
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -9,8 +11,9 @@ import com.acmerobotics.dashboard.config.Config;
 import robot.LinearSlideSubsystem;
 import robot.Subsystems;
 
-@TeleOp(name = "Linear Slide Dashboard Test")
 @Config
+@Autonomous(name = "Linear Slide Dashboard Test")
+
 public class LinearSlideTestOpMode extends LinearOpMode {
 
 
@@ -44,6 +47,7 @@ public class LinearSlideTestOpMode extends LinearOpMode {
             }
             telemetry.update();
         }
+        waitForStart();
 
         while (opModeIsActive()) {
             slide.update();

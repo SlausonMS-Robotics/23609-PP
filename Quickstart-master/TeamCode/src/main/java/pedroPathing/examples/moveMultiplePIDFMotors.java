@@ -19,7 +19,7 @@ public class moveMultiplePIDFMotors extends LinearOpMode {
             robot.init(hardwareMap);
 
         waitForStart();
-
+/*
         // Example: move 2 motors to 1000 encoder ticks
         robot.moveMotorsToPositionPIDF(
                 Arrays.asList(robot.armMotor, robot.vslideMotor),
@@ -28,5 +28,7 @@ public class moveMultiplePIDFMotors extends LinearOpMode {
                 10,       // Tolerance
                 2.0      // Timeout in seconds
         );
+
+ */
     }
 }

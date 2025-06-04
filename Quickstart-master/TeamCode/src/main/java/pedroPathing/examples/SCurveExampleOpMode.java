@@ -19,7 +19,8 @@ public class SCurveExampleOpMode extends LinearOpMode {
         waitForStart();
 
         // Move arm to position 1000 over 2.0 seconds with max 600 ticks/sec velocity
-        armController = new SCurveMotionController(armMotor, 1000, 2.0, 600);
+        armController = new SCurveMotionController(armMotor);
+        //armController.queueMotion();
 
         // Update loop: keep updating the motion profile while it's running
         while (opModeIsActive() && armController.update()) {

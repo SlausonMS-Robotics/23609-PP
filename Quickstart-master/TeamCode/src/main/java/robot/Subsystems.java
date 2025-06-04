@@ -18,9 +18,9 @@ public class Subsystems {
         armMotor = hardwareMap.get(DcMotorEx.class, "viperslide axis");
         vslideMotor = hardwareMap.get(DcMotorEx.class, "viperslide extension");
         vslideMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-        grabServo = hardwareMap.get(Servo.class, "grab_servo");
-        wristServo = hardwareMap.get(Servo.class, "wrist_servo");
-        flipServo = hardwareMap.get(Servo.class, "flip_servo");
+        //grabServo = hardwareMap.get(Servo.class, "grab_servo");
+        //wristServo = hardwareMap.get(Servo.class, "wrist_servo");
+        //flipServo = hardwareMap.get(Servo.class, "flip_servo");
 
         armMotor.setTargetPosition(0);
         armMotor.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
