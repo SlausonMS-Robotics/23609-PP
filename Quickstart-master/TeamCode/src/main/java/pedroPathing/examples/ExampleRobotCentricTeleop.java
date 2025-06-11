@@ -1,15 +1,19 @@
 package pedroPathing.examples;
 
-import android.provider.SyncStateContract;
+//import android.provider.SyncStateContract;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.localization.Pose;
-import com.pedropathing.util.Constants;
+//import com.pedropathing.util.Constants;
 import  com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 import pedroPathing.constants.FConstants;
 import pedroPathing.constants.LConstants;
+
+import robot.Subsystems;
+import robot.LinearSlideSubsystem;
 
 /**
  * This is an example teleop that showcases movement and robot-centric driving.
@@ -21,6 +25,9 @@ import pedroPathing.constants.LConstants;
 @TeleOp(name = "Example Robot-Centric Teleop", group = "Examples")
 public class ExampleRobotCentricTeleop extends OpMode {
     private Follower follower;
+    private DcMotorEx linear1, linear2;
+    private LinearSlideSubsystem slide;
+    private static double scalar = .4;
     private final Pose startPose = new Pose(0,0,0);
 
     /** This method is call once when init is played, it initializes the follower **/
@@ -28,6 +35,12 @@ public class ExampleRobotCentricTeleop extends OpMode {
     public void init() {
         follower = new Follower(hardwareMap, FConstants.class, LConstants.class);
         follower.setStartingPose(startPose);
+        Subsystems robot = new Subsystems();
+        robot.init(hardwareMap);
+        linear1 = robot.vslideMotor;
+        linear2 = null;
+        slide = new LinearSlideSubsystem(linear1, linear2);
+
     }
 
     /** This method is called continuously after Init while waiting to be started. **/
@@ -52,7 +65,7 @@ public class ExampleRobotCentricTeleop extends OpMode {
         - Robot-Centric Mode: true
         */
 
-        follower.setTeleOpMovementVectors(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, true);
+        follower.setTeleOpMovementVectors(-gamepad1.left_stick_y * scalar, -gamepad1.left_stick_x * scalar, -gamepad1.right_stick_x * scalar, true);
         follower.update();
 
         /* Telemetry Outputs of our Follower */

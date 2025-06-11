@@ -15,12 +15,12 @@ public class Subsystems {
 
 
     public void init(HardwareMap hardwareMap) {
-        armMotor = hardwareMap.get(DcMotorEx.class, "viperslide axis");
-        vslideMotor = hardwareMap.get(DcMotorEx.class, "viperslide extension");
+        armMotor = hardwareMap.get(DcMotorEx.class, "motor1");
+        vslideMotor = hardwareMap.get(DcMotorEx.class, "motor0");
         vslideMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-        //grabServo = hardwareMap.get(Servo.class, "grab_servo");
-        //wristServo = hardwareMap.get(Servo.class, "wrist_servo");
-        //flipServo = hardwareMap.get(Servo.class, "flip_servo");
+        grabServo = hardwareMap.get(Servo.class, "servo1");
+        wristServo = hardwareMap.get(Servo.class, "servo0");
+        flipServo = hardwareMap.get(Servo.class, "servo2");
 
         armMotor.setTargetPosition(0);
         armMotor.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);

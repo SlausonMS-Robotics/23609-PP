@@ -19,6 +19,7 @@ import pedroPathing.constants.LConstants;
 @TeleOp(name = "Example Field-Centric Teleop", group = "Examples")
 public class ExampleFieldCentricTeleop extends OpMode {
     private Follower follower;
+    private static double scalar = .4;
     private final Pose startPose = new Pose(0,0,0);
 
     /** This method is call once when init is played, it initializes the follower **/
@@ -50,7 +51,7 @@ public class ExampleFieldCentricTeleop extends OpMode {
         - Robot-Centric Mode: false
         */
 
-        follower.setTeleOpMovementVectors(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x, false);
+        follower.setTeleOpMovementVectors(-gamepad1.left_stick_y * scalar, -gamepad1.left_stick_x * scalar, -gamepad1.right_stick_x * scalar, false);
         follower.update();
 
         /* Telemetry Outputs of our Follower */
