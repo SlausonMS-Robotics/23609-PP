@@ -22,7 +22,7 @@ public class moveMultiplePIDFMotors extends LinearOpMode {
 /*
         // Example: move 2 motors to 1000 encoder ticks
         robot.moveMotorsToPositionPIDF(
-                Arrays.asList(robot.armMotor, robot.vslideMotor),
+                Arrays.asList(robot.ehMotor1, robot.ehMotor0),
                 Arrays.asList(1000, 1000),
                 0.01, 0.0, 0.001, 0.01,  // PIDF coefficients
                 10,       // Tolerance

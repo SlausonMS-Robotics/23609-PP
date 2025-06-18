@@ -13,7 +13,7 @@ public class SCurveExampleOpMode extends LinearOpMode {
     @Override
     public void runOpMode() {
         // Get the motor from the hardware map
-        DcMotor armMotor = hardwareMap.get(DcMotor.class, "armMotor");
+        DcMotor armMotor = hardwareMap.get(DcMotor.class, "ehMotor1");
 
         // Wait for start on Driver Station
         waitForStart();

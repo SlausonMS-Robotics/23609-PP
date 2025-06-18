@@ -1,17 +1,15 @@
 package pedroPathing.examples;
 
 //import android.provider.SyncStateContract;
-
 import com.pedropathing.follower.Follower;
 import com.pedropathing.localization.Pose;
-//import com.pedropathing.util.Constants;
+import com.pedropathing.util.Constants;
 import  com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 import pedroPathing.constants.FConstants;
 import pedroPathing.constants.LConstants;
-
 import robot.Subsystems;
 import robot.LinearSlideSubsystem;
 
@@ -26,7 +24,7 @@ import robot.LinearSlideSubsystem;
 public class ExampleRobotCentricTeleop extends OpMode {
     private Follower follower;
     private DcMotorEx linear1, linear2;
-    private LinearSlideSubsystem slide;
+    //private LinearSlideSubsystem slide;
     private static double scalar = .4;
     private final Pose startPose = new Pose(0,0,0);
 
@@ -37,9 +35,9 @@ public class ExampleRobotCentricTeleop extends OpMode {
         follower.setStartingPose(startPose);
         Subsystems robot = new Subsystems();
         robot.init(hardwareMap);
-        linear1 = robot.vslideMotor;
+        linear1 = robot.ehMotor0;
         linear2 = null;
-        slide = new LinearSlideSubsystem(linear1, linear2);
+        //slide = new LinearSlideSubsystem(linear1, linear2);
 
     }
 

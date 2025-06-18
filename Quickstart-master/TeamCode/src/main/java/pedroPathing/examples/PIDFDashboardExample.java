@@ -20,7 +20,7 @@ public class PIDFDashboardExample extends LinearOpMode {
         waitForStart();
 /*
         robot.moveMotorsToPositionPIDF(
-                Arrays.asList(robot.armMotor, robot.vslideMotor),
+                Arrays.asList(robot.ehMotor1, robot.ehMotor0),
                 Arrays.asList(800, 1200),
                 Arrays.asList(PIDFTuning.armTargetVelocity, PIDFTuning.vslideTargetVelocity),
                 5,

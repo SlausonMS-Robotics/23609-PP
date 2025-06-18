@@ -5,9 +5,12 @@ import com.pedropathing.localization.Pose;
 import com.pedropathing.util.Constants;
 import  com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import pedroPathing.constants.FConstants;
 import pedroPathing.constants.LConstants;
+import robot.Subsystems;
 
 /**
  * This is an example teleop that showcases movement and field-centric driving.
@@ -19,7 +22,10 @@ import pedroPathing.constants.LConstants;
 @TeleOp(name = "Example Field-Centric Teleop", group = "Examples")
 public class ExampleFieldCentricTeleop extends OpMode {
     private Follower follower;
-    private static double scalar = .4;
+    private static double scalar = 1;
+    private Servo servo0, servo1;
+    Subsystems robot = new Subsystems();
+
     private final Pose startPose = new Pose(0,0,0);
 
     /** This method is call once when init is played, it initializes the follower **/
@@ -27,6 +33,9 @@ public class ExampleFieldCentricTeleop extends OpMode {
     public void init() {
         follower = new Follower(hardwareMap, FConstants.class, LConstants.class);
         follower.setStartingPose(startPose);
+        robot.init(hardwareMap);
+        servo0 = robot.servo0;
+
     }
 
     /** This method is called continuously after Init while waiting to be started. **/
@@ -50,6 +59,12 @@ public class ExampleFieldCentricTeleop extends OpMode {
         - Turn Left/Right Movement: -gamepad1.right_stick_x
         - Robot-Centric Mode: false
         */
+        if (gamepad1.a){
+            servo0.setPosition(.5);
+        }
+        else {
+            servo0.setPosition(0);
+        }
 
         follower.setTeleOpMovementVectors(-gamepad1.left_stick_y * scalar, -gamepad1.left_stick_x * scalar, -gamepad1.right_stick_x * scalar, false);
         follower.update();

@@ -2,8 +2,6 @@ package pedroPathing.examples;
 
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
@@ -34,7 +32,7 @@ public class LinearSlideTestOpMode extends LinearOpMode {
 
         Subsystems robot = new Subsystems();
         robot.init(hardwareMap);
-        linear1 = robot.vslideMotor;
+        linear1 = robot.ehMotor0;
         linear2 = null;
         slide = new LinearSlideSubsystem(linear1, linear2);
 

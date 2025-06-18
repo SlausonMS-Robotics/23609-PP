@@ -5,31 +5,30 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
-import utils.SCurveMotionController;
-import com.qualcomm.robotcore.hardware.DcMotor;
 
 public class Subsystems {
-    public DcMotorEx armMotor, vslideMotor;
-    public Servo grabServo, wristServo, flipServo;
+    public DcMotorEx ehMotor1, ehMotor0;
+    public Servo servo0, servo1, servo2;
+    //public Servo grabServo, wristServo, flipServo;
     //private final Map<DcMotor, myPIDFController> pidfMap = new HashMap<>();
 
 
     public void init(HardwareMap hardwareMap) {
-        armMotor = hardwareMap.get(DcMotorEx.class, "motor1");
-        vslideMotor = hardwareMap.get(DcMotorEx.class, "motor0");
-        vslideMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-        grabServo = hardwareMap.get(Servo.class, "servo1");
-        wristServo = hardwareMap.get(Servo.class, "servo0");
-        flipServo = hardwareMap.get(Servo.class, "servo2");
+        //ehMotor1 = hardwareMap.get(DcMotorEx.class, "motor1");
+        //ehMotor0 = hardwareMap.get(DcMotorEx.class, "motor0");
+        //ehMotor0.setDirection(DcMotorSimple.Direction.REVERSE);
+        //servo1 = hardwareMap.get(Servo.class, "servo1");
+        servo0 = hardwareMap.get(Servo.class, "servo0");
+        //servo2 = hardwareMap.get(Servo.class, "servo2");
 
-        armMotor.setTargetPosition(0);
-        armMotor.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        //ehMotor1.setTargetPosition(0);
+        //ehMotor1.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
 
-        vslideMotor.setTargetPosition(0);
-        vslideMotor.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        //ehMotor0.setTargetPosition(0);
+        //ehMotor0.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
 
-        //pidfMap.put(armMotor, new myPIDFController(PIDFTuning.arm_kP, PIDFTuning.arm_kI, PIDFTuning.arm_kD, PIDFTuning.arm_kF));
-        //pidfMap.put(vslideMotor, new myPIDFController(PIDFTuning.vslide_kP, PIDFTuning.vslide_kI, PIDFTuning.vslide_kD, PIDFTuning.vslide_kF));
+        //pidfMap.put(ehMotor1, new myPIDFController(PIDFTuning.arm_kP, PIDFTuning.arm_kI, PIDFTuning.arm_kD, PIDFTuning.arm_kF));
+        //pidfMap.put(ehMotor0, new myPIDFController(PIDFTuning.vslide_kP, PIDFTuning.vslide_kI, PIDFTuning.vslide_kD, PIDFTuning.vslide_kF));
     }
 
     public void setTargetPosition(DcMotorEx motor, int position, int vel) {
