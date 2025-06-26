@@ -46,6 +46,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 
 import java.util.List;
@@ -100,7 +101,10 @@ public class SensorLimelight3A extends LinearOpMode {
         limelight.start();
 
         follower = new Follower(hardwareMap, FConstants.class, LConstants.class);
+        //follower.setPose(startPose);
+        Pose startPose = new Pose(0, 0, Math.toRadians(0));
         follower.setStartingPose(startPose);
+
 
         telemetry.addData(">", "Robot Ready.  Press Play.");
         telemetry.update();
@@ -165,18 +169,20 @@ public class SensorLimelight3A extends LinearOpMode {
 
                     */
 
-                    Pose Curpose = follower.getPose();
+                    Pose Curpose = startPose;
                      double CurposeX = Curpose.getX();
                      double CurposeY = Curpose.getY();
 
-                     double Ydistance = -4 + 10.75/(Math.cos(Math.toRadians(66.7 + result.getTy())));
-                     if (Ydistance > 1 & Ydistance < 30) {
-                         Pose Targetpose = new Pose(0, CurposeY + Ydistance, 0);
+                     double Xdistance = -4 + 10.75/(Math.cos(Math.toRadians(66.7 + result.getTy())));
+                     if (Xdistance > 1 & Xdistance < 30) {
+                         Pose Targetpose = new Pose(CurposeX + Xdistance, 0, 0);
                          TargetPath = new Path(new BezierLine(new Point(Curpose), new Point(Targetpose)));
                          follower.followPath(TargetPath);
-                         follower.update();
+                        follower.update();
                      }
-                    telemetry.addData("YDistance", Ydistance);
+
+
+                     telemetry.addData("YDistance", Xdistance);
                     telemetry.addData("CurposeX", CurposeX);
                     telemetry.addData("CurposeY", CurposeY);
 
