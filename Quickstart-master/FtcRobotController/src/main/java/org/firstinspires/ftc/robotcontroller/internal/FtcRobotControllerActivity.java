@@ -181,7 +181,7 @@ public class FtcRobotControllerActivity extends Activity
 
   private static boolean permissionsValidated = false;
 
-  private WifiDirectChannelChanger wifiDirectChannelChanger;
+  //private WifiDirectChannelChanger wifiDirectChannelChanger;
 
   protected class RobotRestarter implements Restarter {
 
@@ -779,8 +779,8 @@ public class FtcRobotControllerActivity extends Activity
 
       // attempt to set the preferred channel.
       RobotLog.vv(TAG, "pref_wifip2p_channel: attempting to set preferred channel...");
-      wifiDirectChannelChanger = new WifiDirectChannelChanger();
-      wifiDirectChannelChanger.changeToChannel(prefChannel);
+      //wifiDirectChannelChanger = new WifiDirectChannelChanger();
+      //wifiDirectChannelChanger.changeToChannel(prefChannel);
     }
   }
 
