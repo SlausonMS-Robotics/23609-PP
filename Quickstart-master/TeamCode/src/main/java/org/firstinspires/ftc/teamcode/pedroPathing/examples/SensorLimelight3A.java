@@ -32,22 +32,28 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 package org.firstinspires.ftc.teamcode.pedroPathing.examples;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.localization.Pose;
+//import com.pedropathing.pathgen.BezierCurve;
 import com.pedropathing.pathgen.BezierLine;
 import com.pedropathing.pathgen.Path;
 import com.pedropathing.pathgen.Point;
+
 import com.qualcomm.hardware.limelightvision.LLResult;
-import com.qualcomm.hardware.limelightvision.LLResultTypes;
+//import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.LLStatus;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 
-import java.util.List;
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+//import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
+
+//import java.util.List;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.constants.FConstants;
 import org.firstinspires.ftc.teamcode.pedroPathing.constants.LConstants;
@@ -79,19 +85,25 @@ import org.firstinspires.ftc.teamcode.pedroPathing.constants.LConstants;
 public class SensorLimelight3A extends LinearOpMode {
 
     private Limelight3A limelight;
+    private Telemetry telemetryA;
     private Follower follower;
     private Servo Headlight;
     private final Pose startPose = new Pose(0,0,0);
     private Path TargetPath;
+
+    private Pose Targetpose;
+    private int target_flag = 0;
 
     @Override
     public void runOpMode() throws InterruptedException
     {
         limelight = hardwareMap.get(Limelight3A.class, "Limelight");
         Headlight = hardwareMap.get(Servo.class, "Headlight");
-        telemetry.setMsTransmissionInterval(11);
 
-        limelight.pipelineSwitch(4);
+        telemetry.setMsTransmissionInterval(11);
+        //telemetry = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
+
+        limelight.pipelineSwitch(5);
 
         /*
          * Starts polling for data.  If you neglect to call start(), getLatestResult() will return null.
@@ -99,18 +111,19 @@ public class SensorLimelight3A extends LinearOpMode {
         limelight.start();
 
         follower = new Follower(hardwareMap, FConstants.class, LConstants.class);
-        //follower.setPose(startPose);
+        follower.setPose(startPose);
         Pose startPose = new Pose(0, 0, Math.toRadians(0));
         follower.setStartingPose(startPose);
 
 
         telemetry.addData(">", "Robot Ready.  Press Play.");
         telemetry.update();
+        Headlight.setPosition(1);
 
         waitForStart();
 
         follower.startTeleopDrive();
-        Headlight.setPosition(1);
+
 
         while (opModeIsActive()) {
             LLStatus status = limelight.getStatus();
@@ -122,23 +135,32 @@ public class SensorLimelight3A extends LinearOpMode {
                     status.getPipelineIndex(), status.getPipelineType());
 
             LLResult result = limelight.getLatestResult();
+
             if (result != null) {
                 // Access general information
-                Pose3D botpose = result.getBotpose();
-                double captureLatency = result.getCaptureLatency();
-                double targetingLatency = result.getTargetingLatency();
-                double parseLatency = result.getParseLatency();
-                telemetry.addData("LL Latency", captureLatency + targetingLatency);
-                telemetry.addData("Parse Latency", parseLatency);
-                telemetry.addData("PythonOutput", java.util.Arrays.toString(result.getPythonOutput()));
-                
-                if (result.isValid()) {
+               // Pose3D botpose = result.getBotpose();
+               // double captureLatency = result.getCaptureLatency();
+                //double targetingLatency = result.getTargetingLatency();
+                //double parseLatency = result.getParseLatency();
+                //double[] pythonOutputs = result.getPythonOutput();
+                //telemetry.addData("LL Latency", captureLatency + targetingLatency);
+                //telemetry.addData("Parse Latency", parseLatency);
+               // telemetry.addData("PythonOutput", java.util.Arrays.toString(result.getPythonOutput()));
+
+                if (!result.isValid()) {
+                    /*
                     telemetry.addData("tx", result.getTx());
                     telemetry.addData("txnc", result.getTxNC());
                     telemetry.addData("ty", result.getTy());
                     telemetry.addData("tync", result.getTyNC());
+                    telemetry.addData("py0", pythonOutputs[0]);
+                    telemetry.addData("py1", pythonOutputs[1]);
+                    telemetry.addData("py2", pythonOutputs[2]);
+                    telemetry.addData("py3", pythonOutputs[3]);
+                    telemetry.addData("py4", pythonOutputs[4]);
+                    telemetry.addData("py5", pythonOutputs[5]);
 
-                    /*
+
                     if (result.getTy() > -20){
                         follower.setTeleOpMovementVectors(.25,0,0,true);
                         follower.update();
@@ -171,19 +193,29 @@ public class SensorLimelight3A extends LinearOpMode {
                      double CurposeX = Curpose.getX();
                      double CurposeY = Curpose.getY();
 
-                     double Xdistance = -4 + 10.75/(Math.cos(Math.toRadians(66.7 + result.getTy())));
-                     if (Xdistance > 1 & Xdistance < 30) {
-                         Pose Targetpose = new Pose(CurposeX + Xdistance, 0, 0);
-                         TargetPath = new Path(new BezierLine(new Point(Curpose), new Point(Targetpose)));
-                         follower.followPath(TargetPath);
-                        follower.update();
+                     double Xdistance = 10.25 * (Math.tan(Math.toRadians(66 + result.getTy())));
+                     double Ydistance = 3 + (-Xdistance * (Math.tan(Math.toRadians(result.getTx()))));
+
+
+                     if (Xdistance > 10 & Xdistance < 50) {
+                         if (target_flag == 0) {
+                              Targetpose = new Pose(CurposeX + Xdistance, CurposeY + Ydistance, 0);
+                             TargetPath = new Path(new BezierLine(new Point(Curpose), new Point(Targetpose)));
+                             TargetPath.setConstantHeadingInterpolation(0);
+                             follower.followPath(TargetPath, false);
+                              target_flag = 1;
+                              Headlight.setPosition(0);
+                         }
+
+
                      }
+                    follower.update();
 
-
-                     telemetry.addData("YDistance", Xdistance);
+                     telemetry.addData("XDistance", Xdistance);
                     telemetry.addData("CurposeX", CurposeX);
                     telemetry.addData("CurposeY", CurposeY);
-
+                    telemetry.addData("YDistance", Ydistance);
+/*
                      // Access barcode results
                     List<LLResultTypes.BarcodeResult> barcodeResults = result.getBarcodeResults();
                     for (LLResultTypes.BarcodeResult br : barcodeResults) {
@@ -213,13 +245,23 @@ public class SensorLimelight3A extends LinearOpMode {
                     for (LLResultTypes.ColorResult cr : colorResults) {
                         telemetry.addData("Color", "X: %.2f, Y: %.2f", cr.getTargetXDegrees(), cr.getTargetYDegrees());
                     }
+
+ */
+                }
+                else {
+                    telemetry.addData("Limelight", "invalid data");
                 }
             } else {
                 telemetry.addData("Limelight", "No data available");
             }
 
             telemetry.update();
+            if (target_flag != 0 && !follower.isBusy()){
+                limelight.stop();
+                terminateOpModeNow();
+            }
         }
-        limelight.stop();
+
+
     }
 }

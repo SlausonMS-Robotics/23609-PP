@@ -21,6 +21,9 @@ import org.firstinspires.ftc.teamcode.robot.Subsystems;
 public class ExampleFieldCentricTeleop extends OpMode {
     private Follower follower;
     private static double scalar = 1;
+    private double xval = 0;
+    private double yval = 0;
+    private double hval = 0;
     private Servo servo0, servo1;
     Subsystems robot = new Subsystems();
 
@@ -64,7 +67,7 @@ public class ExampleFieldCentricTeleop extends OpMode {
             servo0.setPosition(0);
         }
 
-        follower.setTeleOpMovementVectors(-gamepad1.left_stick_y * scalar, -gamepad1.left_stick_x * scalar, -gamepad1.right_stick_x * scalar, false);
+        follower.setTeleOpMovementVectors(Math.pow(-gamepad1.left_stick_y * scalar,3), Math.pow(-gamepad1.left_stick_x * scalar,3), Math.pow(-gamepad1.right_stick_x * scalar,3), false);
         follower.update();
 
         /* Telemetry Outputs of our Follower */
