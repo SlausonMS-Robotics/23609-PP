@@ -6,8 +6,8 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import com.acmerobotics.dashboard.config.Config;
-import org.firstinspires.ftc.teamcode.robot.LinearSlideSubsystem;
-import org.firstinspires.ftc.teamcode.robot.Subsystems;
+import org.firstinspires.ftc.teamcode.archive.LinearSlideSubsystem;
+import org.firstinspires.ftc.teamcode.archive.Subsystems;
 
 @Config
 @Autonomous(name = "Linear Slide Dashboard Test")

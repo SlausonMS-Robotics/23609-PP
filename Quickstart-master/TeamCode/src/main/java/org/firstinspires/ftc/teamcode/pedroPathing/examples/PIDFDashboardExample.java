@@ -6,7 +6,7 @@ package org.firstinspires.ftc.teamcode.pedroPathing.examples;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import org.firstinspires.ftc.teamcode.robot.Subsystems;
+import org.firstinspires.ftc.teamcode.archive.Subsystems;
 
 @com.qualcomm.robotcore.eventloop.opmode.Autonomous(name = "PIDF Dashboard Example", group = "Test")
 public class PIDFDashboardExample extends LinearOpMode {

@@ -9,13 +9,12 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 public class limelight3A {
 
+    public static double LIMELIGHT_HEIGHT = 10.25; //height of sensor from the ground
+    public static double LIMELIGHT_ANGLE = 66.0; //angle of sensor relative to the ground
+    public static double LIMELIGHT_Y_OFFSET = 3.0; //distance of sensor from robot center line
     private Limelight3A limelight;
 
     private Servo headlight;
-
-    public limelight3A(){
-
-    }
 
 
     public void init(int pipeline){
@@ -38,14 +37,14 @@ public class limelight3A {
     }
 
 
-    public double getX(){
+    public double getX(){  //return position relative to the sensor position
         LLResult result = limelight.getLatestResult();
-        return (10.25 * (Math.tan(Math.toRadians(66 + result.getTy()))));
+        return (LIMELIGHT_HEIGHT * (Math.tan(Math.toRadians(LIMELIGHT_ANGLE + result.getTy()))));
     }
 
-    public double getY(){
+    public double getY(){ //return position relative to the center line of the robot
         LLResult result = limelight.getLatestResult();
-        return 3 + (getX() * (Math.tan(Math.toRadians(result.getTx()))));
+        return LIMELIGHT_Y_OFFSET + (getX() * (Math.tan(Math.toRadians(result.getTx()))));
     }
 
     public double getHeading(){
@@ -55,6 +54,6 @@ public class limelight3A {
 
     public void stop(){
         limelight.stop();
-        headlight.setPosition(0);
+        headlight.setPosition(0); //turn off headlight
     }
 }
