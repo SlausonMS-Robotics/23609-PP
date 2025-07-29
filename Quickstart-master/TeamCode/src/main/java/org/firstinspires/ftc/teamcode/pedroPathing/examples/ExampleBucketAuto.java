@@ -11,8 +11,12 @@ import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import  com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
+
 import org.firstinspires.ftc.teamcode.pedroPathing.constants.FConstants;
 import org.firstinspires.ftc.teamcode.pedroPathing.constants.LConstants;
+
+import org.firstinspires.ftc.teamcode.robot.limelight3A;
+import org.firstinspires.ftc.teamcode.robot.servos;
 
 /**
  * This is an example auto that showcases movement and control of two servos autonomously.
@@ -27,12 +31,21 @@ import org.firstinspires.ftc.teamcode.pedroPathing.constants.LConstants;
 @Autonomous(name = "Example Auto Blue", group = "Examples")
 public class ExampleBucketAuto extends OpMode {
 
+
+
+    private boolean gripperClose = false, wristExtended = false, slideExtended = false, headlighton = false;
     private Follower follower;
-    private Timer pathTimer, actionTimer, opmodeTimer;
+
+    private servos servos;
+
+    private limelight3A limelight;
+
+    private Timer pathTimer, actionTimer, opmodeTimer, waitTimer;
 
     /** This is the variable where we store the state of our auto.
      * It is used by the pathUpdate method. */
     private int pathState;
+    private boolean targetAquired = false;
 
     /* Create and Define Poses + Paths
      * Poses are built with three constructors: x, y, and heading (in Radians).
@@ -44,13 +57,13 @@ public class ExampleBucketAuto extends OpMode {
      * Lets assume the Robot is facing the human player and we want to score in the bucket */
 
     /** Start Pose of our robot */
-    private final Pose startPose = new Pose(9, 111, Math.toRadians(270));
+    private final Pose startPose = new Pose(0, 0, Math.toRadians(0));
 
     /** Scoring Pose of our robot. It is facing the submersible at a -45 degree (315 degree) angle. */
-    private final Pose scorePose = new Pose(14, 129, Math.toRadians(315));
+    private final Pose scorePose = new Pose(15, 0, Math.toRadians(0));
 
     /** Lowest (First) Sample from the Spike Mark */
-    private final Pose pickup1Pose = new Pose(37, 121, Math.toRadians(0));
+    private final Pose pickup1Pose = new Pose(10, 0, Math.toRadians(0));
 
     /** Middle (Second) Sample from the Spike Mark */
     private final Pose pickup2Pose = new Pose(43, 130, Math.toRadians(0));
@@ -67,10 +80,19 @@ public class ExampleBucketAuto extends OpMode {
 
     /* These are our Paths and PathChains that we will define in buildPaths() */
     private Path scorePreload, park;
-    private PathChain grabPickup1, grabPickup2, grabPickup3, scorePickup1, scorePickup2, scorePickup3;
+    private PathChain grabPickup1;
+    private PathChain grabPickup2;
+    private PathChain grabPickup3;
+    private PathChain scorePickup1;
+    private PathChain scorePickup2;
+    private PathChain scorePickup3;
 
     /** Build the paths for the auto (adds, for example, constant/linear headings while doing paths)
      * It is necessary to do this so that all the paths are built before the auto starts. **/
+
+
+
+
     public void buildPaths() {
 
         /* There are two major types of paths components: BezierCurves and BezierLines.
@@ -99,6 +121,10 @@ public class ExampleBucketAuto extends OpMode {
         grabPickup1 = follower.pathBuilder()
                 .addPath(new BezierLine(new Point(scorePose), new Point(pickup1Pose)))
                 .setLinearHeadingInterpolation(scorePose.getHeading(), pickup1Pose.getHeading())
+                //.addParametricCallback(0.5, () -> servos.setSlideServo(.6))
+                //.addParametricCallback(0.6, () -> WristServo.setPosition(.45))
+                //.addParametricCallback(.9, () -> GripperServo.setPosition(.5))
+                //.addParametricCallback(0, () -> getLime(.75))
                 .build();
 
         /* This is our scorePickup1 PathChain. We are using a single path with a BezierLine, which is a straight line. */
@@ -135,6 +161,47 @@ public class ExampleBucketAuto extends OpMode {
         park = new Path(new BezierCurve(new Point(scorePose), /* Control Point */ new Point(parkControlPose), new Point(parkPose)));
         park.setLinearHeadingInterpolation(scorePose.getHeading(), parkPose.getHeading());
     }
+/*
+    public void getLime(double checkT){
+        if(follower.isBusy()) {
+            if(follower.getCurrentTValue() >= checkT/2){
+                servo0.setPosition(1);
+
+            }
+            else {
+                servo0.setPosition(0);
+            }
+
+            if(follower.getCurrentTValue() >= checkT) {
+                    LLResult result = limelight.getLatestResult();
+
+
+
+
+                if (result != null && !result.isValid() && !targetAquired) {
+                    servo0.setPosition(0);
+                    Pose curPose = follower.getPose();
+                    double Xdistance = (10.25 * (Math.tan(Math.toRadians(66 + result.getTy())))) - 20;
+                    double curX = curPose.getX();
+                    follower.
+                    double Ydistance = (Xdistance * (Math.tan(Math.toRadians(result.getTx())))) -3;
+                    follower.poseUpdater.setXOffset(Xdistance);
+                    targetAquired = true;
+                    //follower.poseUpdater.setYOffset(Ydistance);
+
+                }
+            }
+
+        }
+        else if (follower.getCurrentTValue() >= 1){
+            servo0.setPosition(0);
+            //follower.poseUpdater.resetOffset();
+            limelight.stop();
+        }
+
+    }
+
+ */
 
     /** This switch is called continuously and runs the pathing, at certain points, it triggers the action state.
      * Everytime the switch changes case, it will reset the timer. (This is because of the setPathState() method)
@@ -158,28 +225,54 @@ public class ExampleBucketAuto extends OpMode {
                     /* Score Preload */
 
                     /* Since this is a pathChain, we can have Pedro hold the end point while we are grabbing the sample */
-                    follower.followPath(grabPickup1,true);
+                    follower.followPath(grabPickup1, true);
+
                     setPathState(2);
                 }
+
+
                 break;
             case 2:
-                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the pickup1Pose's position */
-                if(!follower.isBusy()) {
-                    /* Grab Sample */
 
-                    /* Since this is a pathChain, we can have Pedro hold the end point while we are scoring the sample */
-                    follower.followPath(scorePickup1,true);
-                    setPathState(3);
+                if(!follower.isBusy()) {
+                    if (pathTimer.getElapsedTime() > 2000) { //sets a timeout to move to the next path if this one fails to proceed.
+                        setPathState(3);
+                    }
+                    limelight.init(5);
+                    double[] llData = limelight.getData();
+                    if (llData[0] != 0.0) { //llData[0] tells us if the limelight data is good or not. If it's 0.0 then it is not, 1.0 is good data.
+                        Pose curPose = follower.getPose();
+                        Pose newPose = new Pose(curPose.getX() + llData[1], curPose.getY() + llData[2], 0);
+                        limelight.stop();
+                        PathChain newPath = follower.pathBuilder()
+                                .addPath(new BezierLine(new Point(curPose), new Point(newPose)))
+                                .setLinearHeadingInterpolation(curPose.getHeading(), newPose.getHeading())
+                                .build();
+                        follower.followPath(newPath, true);
+                    }
                 }
+                 else {
+                    servos.slideFullExtend();
+                    servos.wristFullExtend();
+                    if (follower.atParametricEnd()) {
+                        if (!gripperClose) {
+                            gripperClose = servos.closeGripper();
+                            actionTimer.resetTimer();
+                        } else if (actionTimer.getElapsedTime() > 750) { //wait 750ms after gripper close to go to next path state
+                            setPathState(3);
+                        }
+                    }
+                }
+
                 break;
             case 3:
-                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
+
                 if(!follower.isBusy()) {
                     /* Score Sample */
 
-                    /* Since this is a pathChain, we can have Pedro hold the end point while we are grabbing the sample */
-                    follower.followPath(grabPickup2,true);
-                    setPathState(4);
+                         headlighton = servos.headlightOn();
+                         servos.SlideServoOff();
+
                 }
                 break;
             case 4:
@@ -237,8 +330,10 @@ public class ExampleBucketAuto extends OpMode {
     /** These change the states of the paths and actions
      * It will also reset the timers of the individual switches **/
     public void setPathState(int pState) {
-        pathState = pState;
-        pathTimer.resetTimer();
+        //if (!follower.isBusy()) { //this was added to make sure that the state doesn't change until the path is completed
+            pathState = pState;
+            pathTimer.resetTimer();
+       // }
     }
 
     /** This is the main loop of the OpMode, it will run repeatedly after clicking "Play". **/
@@ -247,10 +342,12 @@ public class ExampleBucketAuto extends OpMode {
 
         // These loop the movements of the robot
         follower.update();
+        //LLResult result = limelight.getLatestResult();
         autonomousPathUpdate();
 
         // Feedback to Driver Hub
         telemetry.addData("path state", pathState);
+        telemetry.addData("T", follower.getCurrentTValue());
         telemetry.addData("x", follower.getPose().getX());
         telemetry.addData("y", follower.getPose().getY());
         telemetry.addData("heading", follower.getPose().getHeading());
@@ -264,9 +361,19 @@ public class ExampleBucketAuto extends OpMode {
         opmodeTimer = new Timer();
         opmodeTimer.resetTimer();
 
+
         follower = new Follower(hardwareMap, FConstants.class, LConstants.class);
+
         follower.setStartingPose(startPose);
         buildPaths();
+    }
+   /* public void limelight(){
+        Pose Curpose = startPose;
+        double CurposeX = Curpose.getX();
+        double CurposeY = Curpose.getY();
+
+        double Xdistance = 10.25 * (Math.tan(Math.toRadians(66 + result.getTy())));
+        double Ydistance = 3 + (-Xdistance * (Math.tan(Math.toRadians(result.getTx()))));
     }
 
     /** This method is called continuously after Init while waiting for "play". **/

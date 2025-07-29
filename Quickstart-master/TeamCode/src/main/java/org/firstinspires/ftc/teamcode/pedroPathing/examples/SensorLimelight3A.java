@@ -41,6 +41,9 @@ import com.pedropathing.pathgen.BezierLine;
 import com.pedropathing.pathgen.Path;
 import com.pedropathing.pathgen.Point;
 
+import com.pedropathing.util.SingleRunAction;
+import com.pedropathing.util.Timer;
+
 import com.qualcomm.hardware.limelightvision.LLResult;
 //import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.LLStatus;
@@ -84,21 +87,37 @@ import org.firstinspires.ftc.teamcode.pedroPathing.constants.LConstants;
 //@Disabled
 public class SensorLimelight3A extends LinearOpMode {
 
+    private SingleRunAction MoveOut;
+    private SingleRunAction Grab;
+    private SingleRunAction MoveIn;
     private Limelight3A limelight;
     private Telemetry telemetryA;
     private Follower follower;
     private Servo Headlight;
+    Servo   Slideservo;
+    Servo   WristServo;
+    Servo GripperServo;
     private final Pose startPose = new Pose(0,0,0);
     private Path TargetPath;
 
     private Pose Targetpose;
     private int target_flag = 0;
+    private Timer pathTimer, actionTimer;
+
 
     @Override
     public void runOpMode() throws InterruptedException
     {
+
         limelight = hardwareMap.get(Limelight3A.class, "Limelight");
-        Headlight = hardwareMap.get(Servo.class, "Headlight");
+        Headlight = hardwareMap.get(Servo.class, "servo0");
+        Slideservo = hardwareMap.get(Servo.class, "Servo5");
+        WristServo = hardwareMap.get(Servo.class, "Servo4");
+        GripperServo = hardwareMap.get(Servo.class, "Servo3");
+        pathTimer = new Timer();
+        actionTimer = new Timer();
+
+
 
         telemetry.setMsTransmissionInterval(11);
         //telemetry = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
@@ -119,6 +138,9 @@ public class SensorLimelight3A extends LinearOpMode {
         telemetry.addData(">", "Robot Ready.  Press Play.");
         telemetry.update();
         Headlight.setPosition(1);
+        Slideservo.setPosition(0.5);
+        WristServo.setPosition(0.75);
+        GripperServo.setPosition(0.2);
 
         waitForStart();
 
@@ -133,6 +155,16 @@ public class SensorLimelight3A extends LinearOpMode {
                     status.getTemp(), status.getCpu(),(int)status.getFps());
             telemetry.addData("Pipeline", "Index: %d, Type: %s",
                     status.getPipelineIndex(), status.getPipelineType());
+
+            if (follower.isBusy()) {
+                Slideservo.setPosition(0.94);
+                WristServo.setPosition(0.45);
+            }
+            if (!follower.isBusy() && target_flag == 1) {
+                GripperServo.setPosition(0.5);
+                actionTimer.resetTimer();
+            }
+
 
             LLResult result = limelight.getLatestResult();
 
@@ -211,6 +243,7 @@ public class SensorLimelight3A extends LinearOpMode {
                      }
                     follower.update();
 
+
                      telemetry.addData("XDistance", Xdistance);
                     telemetry.addData("CurposeX", CurposeX);
                     telemetry.addData("CurposeY", CurposeY);
@@ -256,12 +289,16 @@ public class SensorLimelight3A extends LinearOpMode {
             }
 
             telemetry.update();
-            if (target_flag != 0 && !follower.isBusy()){
+            /*
+            if target_flag != 0 && !follower.isBusy()){
                 limelight.stop();
                 terminateOpModeNow();
             }
+
+             */
         }
 
 
     }
 }
+

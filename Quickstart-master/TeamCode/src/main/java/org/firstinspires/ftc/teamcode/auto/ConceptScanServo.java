@@ -27,9 +27,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.firstinspires.ftc.robotcontroller.external.samples;
+package org.firstinspires.ftc.teamcode.auto;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -49,17 +48,26 @@ import com.qualcomm.robotcore.hardware.Servo;
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
 @TeleOp(name = "Concept: Scan Servo", group = "Concept")
-@Disabled
+//@Disabled
 public class ConceptScanServo extends LinearOpMode {
 
-    static final double INCREMENT   = 0.01;     // amount to slew servo each CYCLE_MS cycle
-    static final int    CYCLE_MS    =   50;     // period of each cycle
-    static final double MAX_POS     =  1.0;     // Maximum rotational position
-    static final double MIN_POS     =  0.0;     // Minimum rotational position
-
+    //static final double INCREMENT   = 0.5;     // amount to slew servo each CYCLE_MS cycle
+    static final int    CYCLE_MS    = 2000;     // period of each cycle
+    static final double SlideMAX_POS     = 0.94;     // Maximum rotational position
+    static final double SlideMIN_POS     = 0.5; //-0.02;     // Minimum rotational position
+    static final double WristMAX_POS     = 0.45;     // Maximum rotational position
+    static final double WristMIN_POS     = 0.75;
+    static final double GripperMAX_POS     = 0.5;     // Maximum rotational position
+    static final double GripperMIN_POS     = 0.2;
     // Define class members
-    Servo   servo;
-    double  position = (MAX_POS - MIN_POS) / 2; // Start at halfway position
+    Servo   Slideservo;
+    Servo   WristServo;
+    Servo GripperServo;
+    double Slideposition = SlideMIN_POS; // Start at halfway position
+
+   double Wristposition = WristMIN_POS;
+
+   double Gripperposition = GripperMIN_POS;
     boolean rampUp = true;
 
 
@@ -68,7 +76,9 @@ public class ConceptScanServo extends LinearOpMode {
 
         // Connect to servo (Assume Robot Left Hand)
         // Change the text in quotes to match any servo name on your robot.
-        servo = hardwareMap.get(Servo.class, "left_hand");
+        Slideservo = hardwareMap.get(Servo.class, "Servo5");
+        WristServo = hardwareMap.get(Servo.class, "Servo4");
+        GripperServo = hardwareMap.get(Servo.class, "Servo3");
 
         // Wait for the start button
         telemetry.addData(">", "Press Start to scan Servo." );
@@ -82,28 +92,35 @@ public class ConceptScanServo extends LinearOpMode {
             // slew the servo, according to the rampUp (direction) variable.
             if (rampUp) {
                 // Keep stepping up until we hit the max value.
-                position += INCREMENT ;
-                if (position >= MAX_POS ) {
-                    position = MAX_POS;
+
+                    Slideposition = SlideMAX_POS;
+                    Wristposition = WristMAX_POS;
+                    Gripperposition = GripperMAX_POS;
                     rampUp = !rampUp;   // Switch ramp direction
-                }
+
             }
             else {
                 // Keep stepping down until we hit the min value.
-                position -= INCREMENT ;
-                if (position <= MIN_POS ) {
-                    position = MIN_POS;
+                //position -= INCREMENT ;
+
+                    Slideposition = SlideMIN_POS;
+                    Wristposition = WristMIN_POS;
+                    Gripperposition = GripperMIN_POS;
                     rampUp = !rampUp;  // Switch ramp direction
-                }
+
             }
 
             // Display the current value
-            telemetry.addData("Servo Position", "%5.2f", position);
+            telemetry.addData("Servo Position", "%5.2f", Slideposition);
             telemetry.addData(">", "Press Stop to end test." );
             telemetry.update();
 
             // Set the servo to the new position and pause;
-            servo.setPosition(position);
+            Slideservo.setPosition(Slideposition);
+            sleep(500);
+            WristServo.setPosition(Wristposition);
+            sleep(500);
+            GripperServo.setPosition(Gripperposition);
             sleep(CYCLE_MS);
             idle();
         }

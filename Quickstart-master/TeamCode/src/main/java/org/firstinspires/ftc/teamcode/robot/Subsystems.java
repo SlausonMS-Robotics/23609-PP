@@ -1,16 +1,19 @@
 package org.firstinspires.ftc.teamcode.robot;
 
 
+import com.pedropathing.follower.Follower;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.teamcode.pedroPathing.constants.FConstants;
+import org.firstinspires.ftc.teamcode.pedroPathing.constants.LConstants;
+
 public class Subsystems {
     public DcMotorEx ehMotor1, ehMotor0;
-    public Servo servo0, servo1, servo2;
-    //public Servo grabServo, wristServo, flipServo;
-    //private final Map<DcMotor, myPIDFController> pidfMap = new HashMap<>();
+    public Limelight3A limelight;
+    public Servo Slideservo, WristServo, GripperServo, Headlight;
 
 
     public void init(HardwareMap hardwareMap) {
@@ -18,7 +21,11 @@ public class Subsystems {
         //ehMotor0 = hardwareMap.get(DcMotorEx.class, "motor0");
         //ehMotor0.setDirection(DcMotorSimple.Direction.REVERSE);
         //servo1 = hardwareMap.get(Servo.class, "servo1");
-        servo0 = hardwareMap.get(Servo.class, "servo0");
+        Slideservo = hardwareMap.get(Servo.class, "Servo5");
+        limelight = hardwareMap.get(Limelight3A.class, "Limelight");
+        Headlight = hardwareMap.get(Servo.class, "servo0");
+        WristServo = hardwareMap.get(Servo.class, "Servo4");
+        GripperServo = hardwareMap.get(Servo.class, "Servo3");
         //servo2 = hardwareMap.get(Servo.class, "servo2");
 
         //ehMotor1.setTargetPosition(0);
@@ -36,6 +43,14 @@ public class Subsystems {
         motor.setTargetPosition(position);
         motor.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
         motor.setVelocity(vel); // Apply velocity limit
+    }
+
+    public void limelight3A(int pipeline){
+
+            limelight.pipelineSwitch(pipeline);
+            limelight.start();
+
+
     }
 
 

@@ -35,7 +35,7 @@ public class ExampleFieldCentricTeleop extends OpMode {
         follower = new Follower(hardwareMap, FConstants.class, LConstants.class);
         follower.setStartingPose(startPose);
         robot.init(hardwareMap);
-        servo0 = robot.servo0;
+        //servo0 = robot.headlight;
 
     }
 
