@@ -239,10 +239,12 @@ public class ExampleBucketAuto extends OpMode {
                         setPathState(3);
                     }
                     limelight.init(5);
-                    double[] llData = limelight.getData();
-                    if (llData[0] != 0.0) { //llData[0] tells us if the limelight data is good or not. If it's 0.0 then it is not, 1.0 is good data.
+                    limelight.pollLimelight();
+
+
+                    if (limelight.getArea(1) > 0) { //area will be > 0 for a valid contour
                         Pose curPose = follower.getPose();
-                        Pose newPose = new Pose(curPose.getX() + llData[1], curPose.getY() + llData[2], 0);
+                        Pose newPose = new Pose(curPose.getX() + limelight.getXDist(1), curPose.getY() + limelight.getYDist(1), 0);
                         limelight.stop();
                         PathChain newPath = follower.pathBuilder()
                                 .addPath(new BezierLine(new Point(curPose), new Point(newPose)))
