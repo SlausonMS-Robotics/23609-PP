@@ -1,32 +1,80 @@
 package org.firstinspires.ftc.teamcode.robot;
 
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.hardwareMap;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-
-
+import com.qualcomm.robotcore.hardware.HardwareMap;
 
 public class motors {
 
-    public DcMotorEx motor0, motor1, motor2, motor3;
+    private DcMotorEx liftMotor; // formerly motor0
 
-    public void init(){
-        motor0 = hardwareMap.get(DcMotorEx.class, "ehmotor0");
+    /**
+     * Initializes the lift motor.
+     * Add other motors here as needed.
+     */
+    public void init(HardwareMap hardwareMap) {
+        liftMotor = hardwareMap.get(DcMotorEx.class, "ehmotor0");
     }
 
+    /**
+     * Sets the lift motor target position and velocity.
+     */
     public void setLiftMotor(int pos, int vel) {
-        motor0.setTargetPosition(pos);
-        motor0.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
-        motor0.setVelocity(vel);
+        if (liftMotor == null) return;
+
+        liftMotor.setTargetPosition(pos);
+        liftMotor.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        liftMotor.setVelocity(vel);
     }
 
-    public void stopLiftMotor(){
-        motor0.setPower(0);
+    /**
+     * Stops the lift motor.
+     */
+    public void stopLiftMotor() {
+        if (liftMotor != null) {
+            liftMotor.setPower(0);
+        }
     }
 
-    public void setLiftMotorPosTol (int tol){
-        motor0.setTargetPositionTolerance(tol);
+    /**
+     * Sets the lift motor's target position tolerance.
+     */
+    public void setLiftMotorPosTolerance(int tolerance) {
+        if (liftMotor != null) {
+            liftMotor.setTargetPositionTolerance(tolerance);
+        }
     }
 
+    /**
+     * Enables RUN_TO_POSITION mode for lift motor.
+     */
+    public void runToPosition(int pos, double power) {
+        if (liftMotor == null) return;
+
+        liftMotor.setTargetPosition(pos);
+        liftMotor.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        liftMotor.setPower(power);
+    }
+
+    /**
+     * Checks if lift motor is still moving toward target.
+     */
+    public boolean isLiftBusy() {
+        return liftMotor != null && liftMotor.isBusy();
+    }
+
+    /**
+     * Gets the current position of the lift motor.
+     */
+    public int getLiftPosition() {
+        return liftMotor != null ? liftMotor.getCurrentPosition() : 0;
+    }
+
+    /**
+     * Sets lift motor to brake or float when power is zero.
+     */
+    public void setLiftZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior behavior) {
+        if (liftMotor != null) {
+            liftMotor.setZeroPowerBehavior(behavior);
+        }
+    }
 }
-
-

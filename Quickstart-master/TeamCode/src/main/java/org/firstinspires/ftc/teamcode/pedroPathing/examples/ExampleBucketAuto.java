@@ -45,7 +45,7 @@ public class ExampleBucketAuto extends OpMode {
     /** This is the variable where we store the state of our auto.
      * It is used by the pathUpdate method. */
     private int pathState;
-    private boolean targetAquired = false;
+    private boolean targetAquired = false, limelightOn = false;
 
     /* Create and Define Poses + Paths
      * Poses are built with three constructors: x, y, and heading (in Radians).
@@ -233,27 +233,20 @@ public class ExampleBucketAuto extends OpMode {
 
                 break;
             case 2:
-
+                pathTimeout(3,2000);
                 if(!follower.isBusy()) {
-                    if (pathTimer.getElapsedTime() > 2000) { //sets a timeout to move to the next path if this one fails to proceed.
-                        setPathState(3);
-                    }
-                    limelight.init(5);
-                    limelight.pollLimelight();
 
 
-                    if (limelight.getArea(1) > 0) { //area will be > 0 for a valid contour
-                        Pose curPose = follower.getPose();
-                        Pose newPose = new Pose(curPose.getX() + limelight.getXDist(1), curPose.getY() + limelight.getYDist(1), 0);
-                        limelight.stop();
-                        PathChain newPath = follower.pathBuilder()
-                                .addPath(new BezierLine(new Point(curPose), new Point(newPose)))
-                                .setLinearHeadingInterpolation(curPose.getHeading(), newPose.getHeading())
-                                .build();
-                        follower.followPath(newPath, true);
-                    }
+
+
+
                 }
                  else {
+                    if(follower.getCurrentTValue() >.5)
+                        if(!limelightOn){
+                            limelightOn = limelight.init(5);
+                        }
+                    limelight.pollLimelight();
                     servos.slideFullExtend();
                     servos.wristFullExtend();
                     if (follower.atParametricEnd()) {
@@ -336,6 +329,13 @@ public class ExampleBucketAuto extends OpMode {
             pathState = pState;
             pathTimer.resetTimer();
        // }
+    }
+
+    public void pathTimeout(int pState, int mSec){
+        if (pathTimer.getElapsedTime() > mSec) { //sets a timeout to move to the next path if this one fails to proceed.
+            setPathState(pState);
+            follower.breakFollowing();
+        }
     }
 
     /** This is the main loop of the OpMode, it will run repeatedly after clicking "Play". **/

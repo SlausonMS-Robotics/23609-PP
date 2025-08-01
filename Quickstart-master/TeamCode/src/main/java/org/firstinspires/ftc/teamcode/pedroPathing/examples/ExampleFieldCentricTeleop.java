@@ -9,6 +9,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.teamcode.pedroPathing.constants.FConstants;
 import org.firstinspires.ftc.teamcode.pedroPathing.constants.LConstants;
 import org.firstinspires.ftc.teamcode.archive.Subsystems;
+import org.firstinspires.ftc.teamcode.robot.limelight3A;
+import org.firstinspires.ftc.teamcode.robot.servos;
 
 /**
  * This is an example teleop that showcases movement and field-centric driving.
@@ -24,8 +26,8 @@ public class ExampleFieldCentricTeleop extends OpMode {
     private double xval = 0;
     private double yval = 0;
     private double hval = 0;
-    private Servo servo0, servo1;
-    Subsystems robot = new Subsystems();
+    servos servo = new servos();
+    limelight3A limelight = new limelight3A();
 
     private final Pose startPose = new Pose(0,0,0);
 
@@ -34,7 +36,8 @@ public class ExampleFieldCentricTeleop extends OpMode {
     public void init() {
         follower = new Follower(hardwareMap, FConstants.class, LConstants.class);
         follower.setStartingPose(startPose);
-        robot.init(hardwareMap);
+        servo.init(hardwareMap);
+        limelight.init(hardwareMap,5);
         //servo0 = robot.headlight;
 
     }
@@ -60,12 +63,8 @@ public class ExampleFieldCentricTeleop extends OpMode {
         - Turn Left/Right Movement: -gamepad1.right_stick_x
         - Robot-Centric Mode: false
         */
-        if (gamepad1.a){
-            servo0.setPosition(.5);
-        }
-        else {
-            servo0.setPosition(0);
-        }
+        limelight.pollLimelight();
+        servo.setSlideInches(limelight.getXDist(0));
 
         follower.setTeleOpMovementVectors(Math.pow(-gamepad1.left_stick_y * scalar,3), Math.pow(-gamepad1.left_stick_x * scalar,3), Math.pow(-gamepad1.right_stick_x * scalar,3), false);
         follower.update();
