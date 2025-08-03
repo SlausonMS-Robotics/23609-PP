@@ -29,7 +29,7 @@ public class servos {
      */
     public void init(HardwareMap hardwareMap) {
         slideServo = hardwareMap.get(ServoImplEx.class, "Servo5");
-        headlight = hardwareMap.get(ServoImplEx.class, "servo0");
+        headlight = hardwareMap.get(ServoImplEx.class, "Servo0");
         wristServo = hardwareMap.get(ServoImplEx.class, "Servo4");
         gripperServo = hardwareMap.get(ServoImplEx.class, "Servo3");
     }

@@ -101,8 +101,9 @@ public class limelight3A {
 
     public double getXDist(int index) {
         if (!isValid(index)) return 0;
-        return LIMELIGHT_HEIGHT * Math.tan(Math.toRadians(LIMELIGHT_ANGLE + LLObjects[index].yDeg));
+        return LIMELIGHT_HEIGHT * Math.tan(Math.toRadians(LIMELIGHT_ANGLE - LLObjects[index].yDeg));
     }
+
 
     public double getYDist(int index) {
         if (!isValid(index)) return 0;

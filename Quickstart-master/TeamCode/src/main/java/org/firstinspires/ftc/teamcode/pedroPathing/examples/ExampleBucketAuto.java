@@ -244,7 +244,7 @@ public class ExampleBucketAuto extends OpMode {
                  else {
                     if(follower.getCurrentTValue() >.5)
                         if(!limelightOn){
-                            limelightOn = limelight.init(5);
+                            //limelightOn = limelight.init(5);
                         }
                     limelight.pollLimelight();
                     servos.slideFullExtend();
@@ -266,7 +266,7 @@ public class ExampleBucketAuto extends OpMode {
                     /* Score Sample */
 
                          headlighton = servos.headlightOn();
-                         servos.SlideServoOff();
+                         //servos.SlideServoOff();
 
                 }
                 break;
