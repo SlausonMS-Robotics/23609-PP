@@ -64,7 +64,7 @@ public class ExampleFieldCentricTeleop extends OpMode {
         - Robot-Centric Mode: false
         */
         //limelight.pollLimelight();
-        //servo.setSlideServoPos(servo.setSlideInches(limelight.getXDist(0)));
+        double slide_pos = servo.setSlideInches(limelight.getXDist(0));
 
         follower.setTeleOpMovementVectors(Math.pow(-gamepad1.left_stick_y * scalar,3), Math.pow(-gamepad1.left_stick_x * scalar,3), Math.pow(-gamepad1.right_stick_x * scalar,3), false);
         follower.update();
@@ -81,7 +81,7 @@ public class ExampleFieldCentricTeleop extends OpMode {
         telemetry.addData("Y", follower.getPose().getY());
         telemetry.addData("Heading in Degrees", Math.toDegrees(follower.getPose().getHeading()));
         telemetry.addData("Xdist",limelight.getXDist(0));
-        telemetry.addData("SPos", servo.setSlideInches(limelight.getXDist(0)));
+        telemetry.addData("SPos", slide_pos);
         telemetry.addData("Xdeg",limelight.getXDeg(0));
         telemetry.addData("Ydeg",limelight.getYDeg(0));
         telemetry.addData("area",limelight.getArea(0));

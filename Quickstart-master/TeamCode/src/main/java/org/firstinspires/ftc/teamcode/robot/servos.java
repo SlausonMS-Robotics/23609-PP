@@ -8,11 +8,14 @@ public class servos {
     // ---- Constants ----
 
     private static final double SLIDE_FULL_EXTENSION_POS = 0.6;
+    private static final double SLIDE_FULL_EXTENSION_DEG = 37.5;
     private static final double SLIDE_FULL_RETRACTION_POS = 0.05;
+    private static final double SLIDE_FULL_RETRACTION_DEG = 80;
     private static final double WRIST_FULL_EXTENSION_POS = 0.45;
     private static final double WRIST_FULL_RETRACTION_POS = 0.75;
-    private static final double SLIDE_FULL_TRAVEL_DEG = 80.0;
 
+    private static final double SLIDE_DRIVE_ARM_LENGTH = 11.25;
+    private static final double SLIDE_FULL_RETRACTION_IN = 4.0;
     private static final double SLIDE_FULL_EXTENSION_IN = 14.0;
 
     private static final double GRIPPER_OPEN = 0.2;
@@ -37,14 +40,14 @@ public class servos {
     // ---- Slide Control ----
 
     /**
-     * Converts linear extension (inches) to servo position using polynomial.
+     * Converts linear extension (inches) to servo position
      */
     public double setSlideInches(double inches) {
-        inches = Math.max(0, Math.min(SLIDE_FULL_EXTENSION_IN, inches));
-        return 0.04953510
-                + 0.03943799 * inches
-                - 0.00021206 * Math.pow(inches, 2)
-                + 0.00003250 * Math.pow(inches, 3);
+        inches = SLIDE_FULL_RETRACTION_IN + Math.max(0, Math.min(SLIDE_FULL_EXTENSION_IN, inches));
+        double degrees =  Math.toDegrees(Math.acos(inches/(2 * SLIDE_DRIVE_ARM_LENGTH)));
+        double Servo_Pos = SLIDE_FULL_EXTENSION_DEG + ((degrees-SLIDE_FULL_RETRACTION_DEG)*(SLIDE_FULL_EXTENSION_POS-SLIDE_FULL_EXTENSION_DEG))/SLIDE_FULL_EXTENSION_DEG-SLIDE_FULL_RETRACTION_DEG;
+        if (slideServo != null) slideServo.setPosition(Servo_Pos);
+        return Servo_Pos;
     }
 
     public void setSlideServoPos(double pos) {
