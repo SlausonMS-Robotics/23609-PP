@@ -37,8 +37,8 @@ public class ExampleFieldCentricTeleop extends OpMode {
         follower = new Follower(hardwareMap, FConstants.class, LConstants.class);
         follower.setStartingPose(startPose);
         servo.init(hardwareMap);
-        //limelight.init(hardwareMap,5);
-        //servo0 = robot.headlight;
+        limelight.init(hardwareMap,5);
+        servo.headlightOn();
 
     }
 
@@ -63,8 +63,9 @@ public class ExampleFieldCentricTeleop extends OpMode {
         - Turn Left/Right Movement: -gamepad1.right_stick_x
         - Robot-Centric Mode: false
         */
-        //limelight.pollLimelight();
+        limelight.pollLimelight();
         double slide_pos = servo.setSlideInches(limelight.getXDist(0));
+        servo.setSlideServoPos(slide_pos);
 
         follower.setTeleOpMovementVectors(Math.pow(-gamepad1.left_stick_y * scalar,3), Math.pow(-gamepad1.left_stick_x * scalar,3), Math.pow(-gamepad1.right_stick_x * scalar,3), false);
         follower.update();
