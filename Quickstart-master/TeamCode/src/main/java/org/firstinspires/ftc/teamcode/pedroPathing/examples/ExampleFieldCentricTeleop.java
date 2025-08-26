@@ -5,6 +5,7 @@ import static org.firstinspires.ftc.teamcode.robot.servos.WRIST_FULL_RETRACTION_
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.localization.Pose;
+import com.pedropathing.pathgen.Path;
 import  com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -28,7 +29,7 @@ public class ExampleFieldCentricTeleop extends OpMode {
     private double xval = 0;
     private double yval = 0;
     private double hval = 0;
-    private Timer myTimer;
+    private Timer myTimer, llTimer;
     servos robotservo = new servos();
     servos wristServo = new servos();
     servos grabServo = new servos();
@@ -50,6 +51,7 @@ public class ExampleFieldCentricTeleop extends OpMode {
         robotservo.init(hardwareMap);
         limelight.init(hardwareMap,5);
         myTimer = new Timer();
+        llTimer = new Timer();
         //robotservo.headlightOn();
 
     }
@@ -76,9 +78,7 @@ public class ExampleFieldCentricTeleop extends OpMode {
         - Turn Left/Right Movement: -gamepad1.right_stick_x
         - Robot-Centric Mode: false
         */
-        limelight.pollLimelight();
-        double targetDist = limelight.getXDist(0);
-        if (targetDist > 0) robotservo.setSlideInches(targetDist);
+
 
 
 
@@ -137,12 +137,34 @@ public class ExampleFieldCentricTeleop extends OpMode {
             if (gripOpen) {
                 robotservo.closeGripper();
                 gripOpen = false;
+                myTimer.resetTimer();
             }
             else {
                 robotservo.openGripper();
                 gripOpen = true;
+                myTimer.resetTimer();
             }
         }
+
+        if (gamepad1.right_trigger > .1) {
+            if (!limelight.getLLStatus()) limelight.startLL(100);
+            boolean llGood = limelight.pollLimelight();
+            if (llGood) {
+                double targetDist = limelight.getXDist(0);
+                if (targetDist > 0) robotservo.setSlideInches(targetDist);
+            }
+        }
+
+        if(gamepad1.a && !follower.isBusy()) {
+            if (!limelight.getLLStatus()) limelight.startLL(100);
+            boolean llGood = limelight.pollLimelight();
+            if (llGood) {
+                follower.followPath(limelight.LLDriveTo());
+                follower.update();
+            }
+        }
+
+        if (llTimer.getElapsedTimeSeconds() >= 3 && limelight.getLLStatus()) limelight.stopLL();
 
 
 
