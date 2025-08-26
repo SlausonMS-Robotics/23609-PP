@@ -1,17 +1,19 @@
 package org.firstinspires.ftc.teamcode.pedroPathing.examples;
 
+import static org.firstinspires.ftc.teamcode.robot.servos.WRIST_FULL_EXTENSION_POS;
+import static org.firstinspires.ftc.teamcode.robot.servos.WRIST_FULL_RETRACTION_POS;
+
 import com.pedropathing.follower.Follower;
 import com.pedropathing.localization.Pose;
 import  com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.constants.FConstants;
 import org.firstinspires.ftc.teamcode.pedroPathing.constants.LConstants;
-import org.firstinspires.ftc.teamcode.archive.Subsystems;
 import org.firstinspires.ftc.teamcode.robot.limelight3A;
 import org.firstinspires.ftc.teamcode.robot.servos;
 
+import com.pedropathing.util.Timer;
 /**
  * This is an example teleop that showcases movement and field-centric driving.
  *
@@ -22,12 +24,21 @@ import org.firstinspires.ftc.teamcode.robot.servos;
 @TeleOp(name = "Example Field-Centric Teleop", group = "Examples")
 public class ExampleFieldCentricTeleop extends OpMode {
     private Follower follower;
-    private static double scalar = .75;
+    private static double scalar = 1.0;
     private double xval = 0;
     private double yval = 0;
     private double hval = 0;
-    servos servo = new servos();
+    private Timer myTimer;
+    servos robotservo = new servos();
+    servos wristServo = new servos();
+    servos grabServo = new servos();
     limelight3A limelight = new limelight3A();
+
+    private int state = 0;
+    private boolean gripOpen = false;
+
+    private boolean runState = false;
+    private boolean precise = false;
 
     private final Pose startPose = new Pose(0,0,0);
 
@@ -36,9 +47,10 @@ public class ExampleFieldCentricTeleop extends OpMode {
     public void init() {
         follower = new Follower(hardwareMap, FConstants.class, LConstants.class);
         follower.setStartingPose(startPose);
-        servo.init(hardwareMap);
+        robotservo.init(hardwareMap);
         limelight.init(hardwareMap,5);
-        servo.headlightOn();
+        myTimer = new Timer();
+        //robotservo.headlightOn();
 
     }
 
@@ -51,6 +63,7 @@ public class ExampleFieldCentricTeleop extends OpMode {
     @Override
     public void start() {
         follower.startTeleopDrive();
+        robotservo.openGripper();
     }
 
     /** This is the main loop of the opmode and runs continuously after play **/
@@ -63,26 +76,81 @@ public class ExampleFieldCentricTeleop extends OpMode {
         - Turn Left/Right Movement: -gamepad1.right_stick_x
         - Robot-Centric Mode: false
         */
-        limelight.pollLimelight();
-        double slide_pos = servo.setSlideInches(limelight.getXDist(0));
-        servo.setSlideServoPos(slide_pos);
+        //limelight.pollLimelight();
+        //double slide_pos = robotservo.setSlideInches(limelight.getXDist(0));
+        //robotservo.setSlideServoPos(slide_pos);
 
-        follower.setTeleOpMovementVectors(Math.pow(-gamepad1.left_stick_y * scalar,3), Math.pow(-gamepad1.left_stick_x * scalar,3), Math.pow(-gamepad1.right_stick_x * scalar,3), false);
-        follower.update();
 
-        if(gamepad1.a){
-            servo.slideFullRetract();
+
+        if(gamepad1.left_trigger > .1) {
+            scalar = .5;
+            follower.setTeleOpMovementVectors(Math.pow(-gamepad1.left_stick_y * scalar,1), Math.pow(-gamepad1.left_stick_x * scalar,1), Math.pow(-gamepad1.right_stick_x * scalar,1), false);
         }
-        if(gamepad1.y){
-            servo.slideFullExtend();
+        else {
+            scalar = 1.0;
+            follower.setTeleOpMovementVectors(Math.pow(-gamepad1.left_stick_y * scalar,2), Math.pow(-gamepad1.left_stick_x * scalar,2), Math.pow(-gamepad1.right_stick_x * scalar,2), false);
         }
 
-        /* Telemetry Outputs of our Follower */
+         follower.update();
+
+        if(gamepad1.b && myTimer.getElapsedTime() > 300) {
+            runState = true;
+            myTimer.resetTimer();
+            state++;
+        }
+        if(gamepad1.x && myTimer.getElapsedTime() > 300) {
+            runState = true;
+            myTimer.resetTimer();
+            state--;
+            if (state < 0){
+                state = 0;
+            }
+        }
+
+        if (runState){
+            switch (state) {
+                case 0:
+                    robotservo.slideFullRetract();
+                    robotservo.setWristServo(WRIST_FULL_RETRACTION_POS);
+
+                    break;
+                case 1:
+                    robotservo.slideFullExtend();
+                    break;
+                case 2:
+                    robotservo.setWristServo(.5);
+                    break;
+                case 3:
+                    robotservo.setWristServo(WRIST_FULL_EXTENSION_POS);
+                    break;
+                case 4:
+                    robotservo.closeGripper();
+                    state = 3;
+                    break;
+
+            }
+            runState = false;
+        }
+
+        if(gamepad1.y && myTimer.getElapsedTime() > 300){
+            if (gripOpen) {
+                robotservo.closeGripper();
+                gripOpen = false;
+            }
+            else {
+                robotservo.openGripper();
+                gripOpen = true;
+            }
+        }
+
+
+
+        /* Telemetry Outputs of our Follower
         telemetry.addData("X", follower.getPose().getX());
         telemetry.addData("Y", follower.getPose().getY());
         telemetry.addData("Heading in Degrees", Math.toDegrees(follower.getPose().getHeading()));
         telemetry.addData("Xdist",limelight.getXDist(0));
-        telemetry.addData("SPos", slide_pos);
+        //telemetry.addData("SPos", slide_pos);
         telemetry.addData("Xdeg",limelight.getXDeg(0));
         telemetry.addData("Ydeg",limelight.getYDeg(0));
         telemetry.addData("area",limelight.getArea(0));
@@ -94,6 +162,7 @@ public class ExampleFieldCentricTeleop extends OpMode {
     /** We do not use this because everything automatically should disable **/
     @Override
     public void stop() {
-        servo.slideServoOff();
+        robotservo.slideServoOff();
     }
+
 }

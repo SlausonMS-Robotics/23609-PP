@@ -7,19 +7,19 @@ public class servos {
 
     // ---- Constants ----
 
-    private static final double SLIDE_FULL_EXTENSION_POS = 0.6;
-    private static final double SLIDE_FULL_EXTENSION_DEG = 37.5;
-    private static final double SLIDE_FULL_RETRACTION_POS = 0.05;
-    private static final double SLIDE_FULL_RETRACTION_DEG = 80;
-    private static final double WRIST_FULL_EXTENSION_POS = 0.45;
-    private static final double WRIST_FULL_RETRACTION_POS = 0.75;
+    public static final double SLIDE_FULL_EXTENSION_POS = 0.65;
+    public static final double SLIDE_FULL_EXTENSION_DEG = 37.5;
+    public static final double SLIDE_FULL_RETRACTION_POS = 0.5;
+    public static final double SLIDE_FULL_RETRACTION_DEG = 80;
+    public static final double WRIST_FULL_EXTENSION_POS = 0.4;
+    public static final double WRIST_FULL_RETRACTION_POS = .85;
 
-    private static final double SLIDE_DRIVE_ARM_LENGTH = 11.25;
-    private static final double SLIDE_FULL_RETRACTION_IN = 4.0;
-    private static final double SLIDE_FULL_EXTENSION_IN = 14.0;
+    public static final double SLIDE_DRIVE_ARM_LENGTH = 11.25;
+    public static final double SLIDE_FULL_RETRACTION_IN = 4.0;
+    public static final double SLIDE_FULL_EXTENSION_IN = 14.0;
 
-    private static final double GRIPPER_OPEN = 0.2;
-    private static final double GRIPPER_CLOSE = 0.5;
+    public static final double GRIPPER_OPEN = 0.4;
+    public static final double GRIPPER_CLOSE = 0.65;
 
     // ---- Servos ----
     private ServoImplEx slideServo;    // servo5
@@ -31,10 +31,10 @@ public class servos {
      * Initializes all servos.
      */
     public void init(HardwareMap hardwareMap) {
-        slideServo = hardwareMap.get(ServoImplEx.class, "Servo5");
+        slideServo = hardwareMap.get(ServoImplEx.class, "servohub0");
         headlight = hardwareMap.get(ServoImplEx.class, "Servo0");
-        wristServo = hardwareMap.get(ServoImplEx.class, "Servo4");
-        gripperServo = hardwareMap.get(ServoImplEx.class, "Servo3");
+        wristServo = hardwareMap.get(ServoImplEx.class, "servohub2");
+        gripperServo = hardwareMap.get(ServoImplEx.class, "servohub1");
     }
 
     // ---- Slide Control ----
