@@ -14,6 +14,8 @@ public class servos {
     public static final double WRIST_FULL_EXTENSION_POS = 0.4;
     public static final double WRIST_FULL_RETRACTION_POS = .85;
 
+    public static final double SLIDE_SERVO_MAX_DEG = 170;
+
     public static final double SLIDE_DRIVE_ARM_LENGTH = 11.25;
     public static final double SLIDE_FULL_RETRACTION_IN = 4.0;
     public static final double SLIDE_FULL_EXTENSION_IN = 14.0;
@@ -45,9 +47,11 @@ public class servos {
     public double setSlideInches(double inches) {
         inches = SLIDE_FULL_RETRACTION_IN + Math.max(0, Math.min(SLIDE_FULL_EXTENSION_IN, inches));
         double degrees =  Math.toDegrees(Math.acos(inches/(2 * SLIDE_DRIVE_ARM_LENGTH)));
-        double Servo_Pos = SLIDE_FULL_EXTENSION_DEG + ((degrees-SLIDE_FULL_RETRACTION_DEG)*(SLIDE_FULL_EXTENSION_POS-SLIDE_FULL_EXTENSION_DEG))/SLIDE_FULL_EXTENSION_DEG-SLIDE_FULL_RETRACTION_DEG;
-        if (slideServo != null) slideServo.setPosition(Servo_Pos);
-        return Servo_Pos;
+        double degreeOffset = 1;
+        double servoPos = (degrees + degreeOffset) / SLIDE_SERVO_MAX_DEG; //set physical servo min position to horizontal
+        //double servoPos = SLIDE_FULL_EXTENSION_DEG + ((degrees-SLIDE_FULL_RETRACTION_DEG)*(SLIDE_FULL_EXTENSION_POS-SLIDE_FULL_EXTENSION_DEG))/SLIDE_FULL_EXTENSION_DEG-SLIDE_FULL_RETRACTION_DEG;
+        if (slideServo != null) slideServo.setPosition(servoPos);
+        return servoPos;
     }
 
     public void setSlideServoPos(double pos) {
@@ -70,11 +74,6 @@ public class servos {
 
     public void slideServoOn() {
         if (slideServo != null) slideServo.setPwmEnable();
-    }
-
-    public void slideTrackLL(double inches) {
-        double pos = setSlideInches(inches);
-        setSlideServoPos(pos);
     }
 
     // ---- Gripper Control ----

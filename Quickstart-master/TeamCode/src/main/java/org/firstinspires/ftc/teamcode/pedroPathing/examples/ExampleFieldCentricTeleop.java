@@ -76,9 +76,10 @@ public class ExampleFieldCentricTeleop extends OpMode {
         - Turn Left/Right Movement: -gamepad1.right_stick_x
         - Robot-Centric Mode: false
         */
-        //limelight.pollLimelight();
-        //double slide_pos = robotservo.setSlideInches(limelight.getXDist(0));
-        //robotservo.setSlideServoPos(slide_pos);
+        limelight.pollLimelight();
+        double targetDist = limelight.getXDist(0);
+        if (targetDist > 0) robotservo.setSlideInches(targetDist);
+
 
 
 
