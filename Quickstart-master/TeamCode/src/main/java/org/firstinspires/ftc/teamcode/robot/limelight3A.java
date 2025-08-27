@@ -4,6 +4,11 @@ import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.pedropathing.follower.Follower;
+import com.pedropathing.localization.Pose;
+import com.pedropathing.pathgen.BezierLine;
+import com.pedropathing.pathgen.PathBuilder;
+import com.pedropathing.pathgen.PathChain;
 
 public class limelight3A {
 
@@ -12,6 +17,17 @@ public class limelight3A {
     public static final double LIMELIGHT_ANGLE = 66.0;   // degrees
     public static final double LIMELIGHT_Y_OFFSET = 3.0; // inches
     public static final int LIMELIGHT_OBJECT_COUNT = 5;
+
+    public static final double LIMELIGHT_DRIVE_OFFSET_X = 6;
+    public static final double LIMELIGHT_DRIVE_OFFSET_Y = 3;
+
+    public boolean LLOn = false;
+
+
+    private Pose sample = new Pose(), difference = new Pose(), target = new Pose(); // The best sample's position
+    private Pose cachedTarget = new Pose(); // Cached best sample
+    private PathChain toTarget;
+    private Follower f;
 
     // Hardware
     private Limelight3A limelight;
@@ -29,9 +45,10 @@ public class limelight3A {
             limelight = hwMap.get(Limelight3A.class, "Limelight");
             headlight = hwMap.get(Servo.class, "Servo0");
 
-            headlight.setPosition(1);  // turn on headlight
+
+            limelight.setPollRateHz(100);
             limelight.pipelineSwitch(pipeline);
-            limelight.start();
+
 
             return true;
         } catch (Exception e) {
@@ -43,11 +60,47 @@ public class limelight3A {
     /**
      * Grabs the latest Limelight result and parses it into LLObjects.
      */
-    public void pollLimelight() {
-        if (limelight == null) return;
+
+    public void startLL(int wait_ms){
+        limelight.start();
+        headlight.setPosition(1);  // turn on headlight
+        long startTime = System.currentTimeMillis();
+        while (System.currentTimeMillis() - startTime < wait_ms) {
+            // just waiting
+        }
+        LLOn = true;
+    }
+
+    public boolean getLLStatus(){
+        return LLOn;
+    }
+
+    public void stopLL(){
+        limelight.stop();
+        LLOn = false;
+
+    }
+    public boolean pollLimelight() {
+
+        if (limelight == null) return false;
+        f.update();
 
         result = limelight.getLatestResult();
         parseLLData();
+        return true;
+    }
+
+    public PathChain LLDriveTo(){
+        pollLimelight();
+        double x = getXDist(0);
+        double y = getYDist(0);
+        difference = new Pose(sample.getX() + LIMELIGHT_DRIVE_OFFSET_X, sample.getY() + LIMELIGHT_DRIVE_OFFSET_Y, 0);
+        target = new Pose(f.getPose().getX() + difference.getX(), f.getPose().getY() + difference.getY(), f.getPose().getHeading());
+        cachedTarget = target.copy();
+        toTarget = new PathBuilder()
+                .addPath(new BezierLine(f.getPose(), target)).setConstantHeadingInterpolation(f.getPose().getHeading()).build();
+        return toTarget;
+
     }
 
     /**

@@ -204,7 +204,7 @@ public class SensorLimelight3A extends LinearOpMode {
                     if (result.getTx() > 20.9){
                         follower.setTeleOpMovementVectors(0,-0.25,0,true);
                         follower.update();
-                        follower.followPath();
+                        follower.followPaths();
                     }
                     else {
                         follower.setTeleOpMovementVectors(0,0,0,true);
