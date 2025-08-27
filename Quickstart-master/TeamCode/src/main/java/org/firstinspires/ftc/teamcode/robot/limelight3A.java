@@ -10,16 +10,17 @@ import com.pedropathing.pathgen.BezierLine;
 import com.pedropathing.pathgen.PathBuilder;
 import com.pedropathing.pathgen.PathChain;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+
 public class limelight3A {
 
     // Constants
     public static final double LIMELIGHT_HEIGHT = 10.25; // inches
     public static final double LIMELIGHT_ANGLE = 66.0;   // degrees
-    public static final double LIMELIGHT_Y_OFFSET = 3.0; // inches
+    public static final double LIMELIGHT_Y_OFFSET = -3.0; // inches
     public static final int LIMELIGHT_OBJECT_COUNT = 5;
 
-    public static final double LIMELIGHT_DRIVE_OFFSET_X = 6;
-    public static final double LIMELIGHT_DRIVE_OFFSET_Y = 3;
+    public static final double LIMELIGHT_DRIVE_OFFSET_X = 17;
 
     public boolean LLOn = false;
 
@@ -28,6 +29,8 @@ public class limelight3A {
     private Pose cachedTarget = new Pose(); // Cached best sample
     private PathChain toTarget;
     private Follower f;
+
+    private Telemetry telemetry;
 
     // Hardware
     private Limelight3A limelight;
@@ -40,11 +43,12 @@ public class limelight3A {
     /**
      * Initializes the Limelight and headlight hardware.
      */
-    public boolean init(HardwareMap hwMap, int pipeline) {
+    public boolean init(HardwareMap hwMap, int pipeline, Follower f, Telemetry telemetry) {
         try {
             limelight = hwMap.get(Limelight3A.class, "Limelight");
             headlight = hwMap.get(Servo.class, "Servo0");
-
+            this.f = f;
+            this.telemetry = telemetry;
 
             limelight.setPollRateHz(100);
             limelight.pipelineSwitch(pipeline);
@@ -66,7 +70,7 @@ public class limelight3A {
         headlight.setPosition(1);  // turn on headlight
         long startTime = System.currentTimeMillis();
         while (System.currentTimeMillis() - startTime < wait_ms) {
-            // just waiting
+            // just waiting for the headlight to come on
         }
         LLOn = true;
     }
@@ -76,30 +80,51 @@ public class limelight3A {
     }
 
     public void stopLL(){
-        limelight.stop();
+        if (limelight != null) limelight.stop();
+        if (headlight != null) headlight.setPosition(0);
         LLOn = false;
 
     }
     public boolean pollLimelight() {
-
+        telemetry.addLine("Polling LL");
+        telemetry.update();
         if (limelight == null) return false;
-        f.update();
+
 
         result = limelight.getLatestResult();
+        if (result == null) return false;
         parseLLData();
+
         return true;
     }
 
     public PathChain LLDriveTo(){
-        pollLimelight();
-        double x = getXDist(0);
-        double y = getYDist(0);
-        difference = new Pose(sample.getX() + LIMELIGHT_DRIVE_OFFSET_X, sample.getY() + LIMELIGHT_DRIVE_OFFSET_Y, 0);
-        target = new Pose(f.getPose().getX() + difference.getX(), f.getPose().getY() + difference.getY(), f.getPose().getHeading());
-        cachedTarget = target.copy();
-        toTarget = new PathBuilder()
-                .addPath(new BezierLine(f.getPose(), target)).setConstantHeadingInterpolation(f.getPose().getHeading()).build();
-        return toTarget;
+
+        if (result != null) {
+            double x = getXDist(0);
+            double y = getYDist(0);
+            f.update();
+            sample = new Pose(x,y,0);
+            Pose curPose = f.getPose();
+            telemetry.addData("sample", sample);
+            telemetry.addData("current", curPose);
+            telemetry.addData("x", x);
+            telemetry.addData("y", y);
+            //difference = new Pose(x + LIMELIGHT_DRIVE_OFFSET_X, y + LIMELIGHT_DRIVE_OFFSET_Y, 0);
+            //telemetry.addData("difference", difference);
+            target = new Pose(curPose.getX() + x  - LIMELIGHT_DRIVE_OFFSET_X, curPose.getY() - y, curPose.getHeading());
+            telemetry.addData("target", target);
+            telemetry.update();
+            cachedTarget = target.copy();
+            f.update();
+            toTarget = new PathBuilder()
+                    .addPath(new BezierLine(f.getPose(), target)).setConstantHeadingInterpolation(f.getPose().getHeading()).build();
+            return toTarget;
+        }
+        else {
+            return toTarget = new PathBuilder()
+                    .addPath(new BezierLine(f.getPose(), f.getPose())).setConstantHeadingInterpolation(f.getPose().getHeading()).build();
+        }
 
     }
 
@@ -154,7 +179,7 @@ public class limelight3A {
 
     public double getXDist(int index) {
         if (!isValid(index)) return 0;
-        return LIMELIGHT_HEIGHT * Math.tan(Math.toRadians(LIMELIGHT_ANGLE - LLObjects[index].yDeg));
+        return LIMELIGHT_HEIGHT * 1.25 *Math.tan(Math.toRadians(LIMELIGHT_ANGLE - LLObjects[index].yDeg));
     }
 
 
@@ -174,11 +199,6 @@ public class limelight3A {
     /**
      * Stops the Limelight and turns off headlight.
      */
-    public boolean stop() {
-        if (limelight != null) limelight.stop();
-        if (headlight != null) headlight.setPosition(0);
-        return false; //lets us know that the limelight was stopped (true = running, false = stopped)
-    }
 
     // ----- Safety Helpers -----
 

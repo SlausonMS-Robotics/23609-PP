@@ -5,7 +5,6 @@ import static org.firstinspires.ftc.teamcode.robot.servos.WRIST_FULL_RETRACTION_
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.localization.Pose;
-import com.pedropathing.pathgen.Path;
 import  com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -49,7 +48,7 @@ public class ExampleFieldCentricTeleop extends OpMode {
         follower = new Follower(hardwareMap, FConstants.class, LConstants.class);
         follower.setStartingPose(startPose);
         robotservo.init(hardwareMap);
-        limelight.init(hardwareMap,5);
+        limelight.init(hardwareMap,5, follower, telemetry);
         myTimer = new Timer();
         llTimer = new Timer();
         //robotservo.headlightOn();
@@ -89,7 +88,7 @@ public class ExampleFieldCentricTeleop extends OpMode {
         }
         else {
             scalar = 1.0;
-            follower.setTeleOpMovementVectors(Math.pow(-gamepad1.left_stick_y * scalar,2), Math.pow(-gamepad1.left_stick_x * scalar,2), Math.pow(-gamepad1.right_stick_x * scalar,2), false);
+            follower.setTeleOpMovementVectors(Math.pow(-gamepad1.left_stick_y * scalar,3), Math.pow(-gamepad1.left_stick_x * scalar,3), Math.pow(-gamepad1.right_stick_x * scalar,3), false);
         }
 
          follower.update();
@@ -156,15 +155,18 @@ public class ExampleFieldCentricTeleop extends OpMode {
         }
 
         if(gamepad1.a && !follower.isBusy()) {
-            if (!limelight.getLLStatus()) limelight.startLL(100);
-            boolean llGood = limelight.pollLimelight();
-            if (llGood) {
+            if (!limelight.getLLStatus()) limelight.startLL(200);
+            if (limelight.pollLimelight()) {
                 follower.followPath(limelight.LLDriveTo());
                 follower.update();
             }
         }
 
-        if (llTimer.getElapsedTimeSeconds() >= 3 && limelight.getLLStatus()) limelight.stopLL();
+        if (llTimer.getElapsedTimeSeconds() >= 3 && limelight.getLLStatus()) {
+            limelight.stopLL();
+            llTimer.resetTimer();
+            follower.startTeleopDrive();
+        }
 
 
 
@@ -178,7 +180,7 @@ public class ExampleFieldCentricTeleop extends OpMode {
         telemetry.addData("Ydeg",limelight.getYDeg(0));
         telemetry.addData("area",limelight.getArea(0));
         /* Update Telemetry to the Driver Hub */
-        telemetry.update();
+        //telemetry.update();
 
     }
 
