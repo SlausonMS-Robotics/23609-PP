@@ -21,6 +21,7 @@ public class limelight3A {
     public static final int LIMELIGHT_OBJECT_COUNT = 5;
 
     public static final double LIMELIGHT_DRIVE_OFFSET_X = 17;
+    public static final double LIMELIGHT_DRIVE_OFFSET_Y = -3;
 
     public boolean LLOn = false;
 
@@ -86,8 +87,7 @@ public class limelight3A {
 
     }
     public boolean pollLimelight() {
-        telemetry.addLine("Polling LL");
-        telemetry.update();
+
         if (limelight == null) return false;
 
 
@@ -98,11 +98,13 @@ public class limelight3A {
         return true;
     }
 
+
+
     public PathChain LLDriveTo(){
 
         if (result != null) {
-            double x = getXDist(0);
-            double y = getYDist(0);
+            double x = getXDist(0) ;
+            double y = getYDist(0) ;
             f.update();
             sample = new Pose(x,y,0);
             Pose curPose = f.getPose();
@@ -110,15 +112,25 @@ public class limelight3A {
             telemetry.addData("current", curPose);
             telemetry.addData("x", x);
             telemetry.addData("y", y);
-            //difference = new Pose(x + LIMELIGHT_DRIVE_OFFSET_X, y + LIMELIGHT_DRIVE_OFFSET_Y, 0);
-            //telemetry.addData("difference", difference);
-            target = new Pose(curPose.getX() + x  - LIMELIGHT_DRIVE_OFFSET_X, curPose.getY() - y, curPose.getHeading());
+            x -= LIMELIGHT_DRIVE_OFFSET_X;
+            y -= - LIMELIGHT_DRIVE_OFFSET_Y;
+            double curHeading = curPose.getHeading();
+            double c = Math.cos(curHeading);
+            double s = Math.sin(curHeading);
+            double x_field  = curPose.getX() + c*x + s*y;
+            double y_field = curPose.getY() + s*x - c*y;
+
+
+            target = new Pose(x_field , y_field, curPose.getHeading());
             telemetry.addData("target", target);
             telemetry.update();
             cachedTarget = target.copy();
             f.update();
             toTarget = new PathBuilder()
-                    .addPath(new BezierLine(f.getPose(), target)).setConstantHeadingInterpolation(f.getPose().getHeading()).build();
+                    .addPath(new BezierLine(f.getPose(), target))
+                    .setConstantHeadingInterpolation(f.getPose().getHeading())
+                    .setZeroPowerAccelerationMultiplier(5)
+                    .build();
             return toTarget;
         }
         else {
@@ -179,13 +191,13 @@ public class limelight3A {
 
     public double getXDist(int index) {
         if (!isValid(index)) return 0;
-        return LIMELIGHT_HEIGHT * 1.25 *Math.tan(Math.toRadians(LIMELIGHT_ANGLE - LLObjects[index].yDeg));
+        return LIMELIGHT_HEIGHT * 1.075 * Math.tan(Math.toRadians(LIMELIGHT_ANGLE + result.getTy()));
     }
 
 
     public double getYDist(int index) {
         if (!isValid(index)) return 0;
-        return LIMELIGHT_Y_OFFSET + LLObjects[index].yDeg * Math.tan(Math.toRadians(LLObjects[index].xDeg));
+        return getXDist(0) / Math.tan(Math.toRadians(90 - result.getTx())) ;
     }
 
     public double getXDeg(int index) { return getSafe(index).xDeg; }
