@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.pedroPathing.tuners_tests.pid;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
@@ -33,7 +34,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.constants.LConstants;
 public class StraightBackAndForth extends OpMode {
     private Telemetry telemetryA;
 
-    public static double DISTANCE = 36;
+    public static double DISTANCE = 24;
 
     private boolean forward = true;
 
@@ -41,6 +42,7 @@ public class StraightBackAndForth extends OpMode {
 
     private Path forwards;
     private Path backwards;
+    private Timer myTimer;
 
     /**
      * This initializes the Follower and creates the forward and backward Paths. Additionally, this
@@ -49,7 +51,7 @@ public class StraightBackAndForth extends OpMode {
     @Override
     public void init() {
         follower = new Follower(hardwareMap, FConstants.class, LConstants.class);
-
+        myTimer = new Timer();
         forwards = new Path(new BezierLine(new Point(0,0, Point.CARTESIAN), new Point(DISTANCE,0, Point.CARTESIAN)));
         forwards.setConstantHeadingInterpolation(0);
         backwards = new Path(new BezierLine(new Point(DISTANCE,0, Point.CARTESIAN), new Point(0,0, Point.CARTESIAN)));
@@ -71,17 +73,19 @@ public class StraightBackAndForth extends OpMode {
     @Override
     public void loop() {
         follower.update();
-        if (!follower.isBusy()) {
-            if (forward) {
-                forward = false;
-                follower.followPath(backwards);
-            } else {
-                forward = true;
-                follower.followPath(forwards);
+        if(myTimer.getElapsedTimeSeconds() >= 5) {
+            if (!follower.isBusy()) {
+                if (forward) {
+                    forward = false;
+                    follower.followPath(backwards);
+                } else {
+                    forward = true;
+                    follower.followPath(forwards);
+                }
             }
+            myTimer.resetTimer();
         }
-
-        telemetryA.addData("going forward", forward);
+        //telemetryA.addData("going forward", forward);
         follower.telemetryDebug(telemetryA);
     }
 }

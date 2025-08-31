@@ -36,9 +36,9 @@ public class ExampleBucketAuto extends OpMode {
     private boolean gripperClose = false, wristExtended = false, slideExtended = false, headlighton = false;
     private Follower follower;
 
-    private servos servos;
+    //private servos servos;
 
-    private limelight3A limelight;
+    limelight3A limelight = new limelight3A();
 
     private Timer pathTimer, actionTimer, opmodeTimer, waitTimer;
 
@@ -60,10 +60,10 @@ public class ExampleBucketAuto extends OpMode {
     private final Pose startPose = new Pose(0, 0, Math.toRadians(0));
 
     /** Scoring Pose of our robot. It is facing the submersible at a -45 degree (315 degree) angle. */
-    private final Pose scorePose = new Pose(15, 0, Math.toRadians(0));
+    private final Pose scorePose = new Pose(35, 0, Math.toRadians(0));
 
     /** Lowest (First) Sample from the Spike Mark */
-    private final Pose pickup1Pose = new Pose(10, 0, Math.toRadians(0));
+    private final Pose pickup1Pose = new Pose(45, 0, Math.toRadians(-90));
 
     /** Middle (Second) Sample from the Spike Mark */
     private final Pose pickup2Pose = new Pose(43, 130, Math.toRadians(0));
@@ -225,7 +225,7 @@ public class ExampleBucketAuto extends OpMode {
                     /* Score Preload */
 
                     /* Since this is a pathChain, we can have Pedro hold the end point while we are grabbing the sample */
-                    follower.followPath(grabPickup1, true);
+                    follower.turnTo(-Math.PI);
 
                     setPathState(2);
                 }
@@ -233,7 +233,7 @@ public class ExampleBucketAuto extends OpMode {
 
                 break;
             case 2:
-                pathTimeout(3,2000);
+                //pathTimeout(3,2000);
                 if(!follower.isBusy()) {
 
 
@@ -242,20 +242,11 @@ public class ExampleBucketAuto extends OpMode {
 
                 }
                  else {
-                    if(follower.getCurrentTValue() >.5)
-                        if(!limelightOn){
-                            //limelightOn = limelight.init(5);
-                        }
-                    limelight.pollLimelight();
-                    servos.slideFullExtend();
-                    servos.wristFullExtend();
-                    if (follower.atParametricEnd()) {
-                        if (!gripperClose) {
-                            gripperClose = servos.closeGripper();
-                            actionTimer.resetTimer();
-                        } else if (actionTimer.getElapsedTime() > 750) { //wait 750ms after gripper close to go to next path state
-                            setPathState(3);
-                        }
+                    if (!limelight.getLLStatus()) limelight.startLL(300);
+                    if (limelight.pollLimelight()) {
+
+                        follower.followPath(limelight.LLDriveTo());
+                        setPathState(-1);
                     }
                 }
 
@@ -265,7 +256,7 @@ public class ExampleBucketAuto extends OpMode {
                 if(!follower.isBusy()) {
                     /* Score Sample */
 
-                         headlighton = servos.headlightOn();
+                         //headlighton = servos.headlightOn();
                          //servos.SlideServoOff();
 
                 }
@@ -366,6 +357,7 @@ public class ExampleBucketAuto extends OpMode {
 
         follower = new Follower(hardwareMap, FConstants.class, LConstants.class);
 
+        limelight.init(hardwareMap,5, follower, telemetry);
         follower.setStartingPose(startPose);
         buildPaths();
     }
