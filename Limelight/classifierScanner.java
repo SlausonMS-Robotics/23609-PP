@@ -8,34 +8,35 @@ public class ClassifierScanner {
 
     private final NetworkTable limelightTable;
     private final MotifTagDetector tagDetector;
+    private final MotifDecoder motifDecoder;
 
-    public ClassifierScanner(MotifTagDetector tagDetector) {
+    public ClassifierScanner(MotifTagDetector tagDetector, MotifDecoder motifDecoder) {
         this.limelightTable = NetworkTableInstance.getDefault().getTable("limelight");
         this.tagDetector = tagDetector;
+        this.motifDecoder = motifDecoder;
     }
 
     public String getNextRequiredArtifact() {
-        // Scan classifier for purple and green artifacts
         List<String> artifacts = new ArrayList<>();
 
-        // Switch to purple pipeline (assume pipeline 1)
-        limelightTable.getEntry("pipeline").setNumber(2);
-        sleep(100); // allow pipeline to settle
+        // Scan purple artifacts (pipeline 1)
+        limelightTable.getEntry("pipeline").setNumber(1);
+        sleep(100);
         int purpleCount = getArtifactCount();
         for (int i = 0; i < purpleCount; i++) artifacts.add("Purple");
 
-        // Switch to green pipeline (assume pipeline 2)
-        limelightTable.getEntry("pipeline").setNumber(3);
+        // Scan green artifacts (pipeline 2)
+        limelightTable.getEntry("pipeline").setNumber(2);
         sleep(100);
         int greenCount = getArtifactCount();
         for (int i = 0; i < greenCount; i++) artifacts.add("Green");
 
-        // Get current motif tag ID
+        // Update and retrieve current motif tag
         tagDetector.updateTagDetection();
         int tagID = tagDetector.getMotifTagId();
 
-        // Decode next required artifact
-        return MotifDecoder.getNextArtifact(tagID, artifacts);
+        // Use real motif decoder logic
+        return motifDecoder.getNextArtifact(tagID, artifacts);
     }
 
     private int getArtifactCount() {
@@ -53,7 +54,8 @@ public class ClassifierScanner {
 
 // OpMode example:
 MotifTagDetector tagDetector = new MotifTagDetector();
-ClassifierScanner scanner = new ClassifierScanner(tagDetector);
+MotifDecoder motifDecoder = new MotifDecoder();
+ClassifierScanner scanner = new ClassifierScanner(tagDetector, motifDecoder);
 
 String nextColor = scanner.getNextRequiredArtifact();
 telemetry.addData("Next Artifact Needed", nextColor);
