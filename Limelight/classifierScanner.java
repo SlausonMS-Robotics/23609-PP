@@ -50,3 +50,11 @@ public class ClassifierScanner {
         try { Thread.sleep(millis); } catch (InterruptedException e) { }
     }
 }
+
+// OpMode example:
+MotifTagDetector tagDetector = new MotifTagDetector();
+ClassifierScanner scanner = new ClassifierScanner(tagDetector);
+
+String nextColor = scanner.getNextRequiredArtifact();
+telemetry.addData("Next Artifact Needed", nextColor);
+telemetry.update();
